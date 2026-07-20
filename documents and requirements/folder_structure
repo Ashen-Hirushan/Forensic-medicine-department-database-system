@@ -1,0 +1,56 @@
+Forensic-Department-System/
+│
+├── run.py                   # The main entry point to run your Flask application
+├── requirements.txt         # Python dependencies (flask, mysql-connector-python, bcrypt)
+├── README.md                # Project overview and setup instructions
+│
+├── database/                # Database setup scripts
+│   ├── schema.sql           # Your 28-table DDL script
+│   └── seed.py              # Your Python mock data seeder
+│
+├── uploads/                 # Secure file storage (NOT accessible directly via web)
+│   ├── court_receipts/      # Scanned PDFs of court dispatch receipts
+│   ├── crime_scenes/        # Autopsy and crime scene photos
+│   └── consent_scans/       # MLEF patient consent thumbprints/signatures
+│
+└── app/                     # The core Flask application package
+    ├── __init__.py          # Initializes the Flask app, secret keys, and registers Blueprints
+    ├── config.py            # Configuration settings (DB host, user, password, upload folders)
+    │
+    ├── services/            # Core business logic and database interactions
+    │   ├── __init__.py
+    │   ├── db.py            # MySQL connection pool and helper functions
+    │   └── auth_utils.py    # Decorators for @login_required and @roles_allowed
+    │
+    ├── routes/              # Flask Blueprints (Your URL endpoints)
+    │   ├── __init__.py
+    │   ├── auth.py          # /login, /logout endpoints
+    │   ├── dashboard.py     # /dashboard (fetches stats from views)
+    │   ├── clinical.py      # /clinical (MLEF forms, living subject cases)
+    │   ├── autopsy.py       # /autopsy (PMR drafts, Death Certificates)
+    │   ├── evidence.py      # /evidence (Lab requests, chain of custody logs)
+    │   └── court.py         # /court (Dispatch logs and uploads)
+    │
+    ├── static/              # Publicly accessible frontend assets
+    │   ├── css/
+    │   │   ├── variables.css      # CSS variables (HSL dark mode palette)
+    │   │   ├── layout.css         # Grid layouts for dashboard
+    │   │   └── components.css     # Glassmorphism cards, buttons, and inputs
+    │   ├── js/
+    │   │   ├── app.js             # General UI interactions (modals, alerts)
+    │   │   └── charts.js          # Chart.js logic for rendering dashboard statistics
+    │   └── images/                # Static icons, logos, avatars
+    │
+    └── templates/           # HTML Jinja2 templates (Frontend Views)
+        ├── base.html        # The master HTML skeleton (includes <head>, CSS/JS links)
+        ├── login.html       # Secure login screen
+        ├── dashboard.html   # Main analytics view
+        ├── components/      # Reusable HTML snippets
+        │   ├── sidebar.html # Navigation menu
+        │   └── navbar.html  # Top bar with user profile/logout
+        ├── clinical/        
+        │   ├── list.html    # Table of all clinical cases
+        │   └── form.html    # The MLEF digital data entry form
+        └── autopsy/         
+            ├── list.html    # Table of all autopsy cases
+            └── form.html    # Cause of death and postmortem findings form
