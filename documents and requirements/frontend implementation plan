@@ -1,0 +1,78 @@
+# Frontend Implementation Plan (Phase 6)
+
+This plan outlines the architecture and implementation steps for building the frontend of the Forensic Medical Department Database System. We will be using Jinja2 HTML templates, Vanilla JavaScript, and Vanilla CSS with a focus on a highly premium, dark-mode, glassmorphism aesthetic.
+
+## User Review Required
+
+> [!IMPORTANT]
+> To achieve the "WOW" factor and premium feel, I will build the styling using Vanilla CSS (giving us maximum control over the aesthetics like glassmorphism and micro-animations) without relying on basic frameworks like Bootstrap or Tailwind. We will use a sleek dark mode with tailored HSL colors. Please confirm if this premium design direction is exactly what you want!
+
+> [!WARNING]
+> We will need to include `Chart.js` to render the statistics on the dashboard. We will load this securely via a CDN link in the `base.html` file.
+
+## Proposed Changes
+
+We will build the frontend iteratively, starting with the base aesthetic and moving to the functional pages, strictly adhering to the `folder_structure` you provided.
+
+### 1. Global Styling & Assets (`app/static/`)
+
+#### [NEW] `app/static/css/variables.css`
+Will define our core design tokens: HSL color palettes (dark mode primary, accent colors like forensic blue/teal), typography (Google Font 'Inter' or 'Outfit'), and shadow/blur values for glassmorphism.
+
+#### [NEW] `app/static/css/layout.css`
+Will establish the CSS Grid and Flexbox structures for the main application shell (Sidebar + Top Navbar + Main Content Area).
+
+#### [NEW] `app/static/css/components.css`
+Will contain reusable styles for cards, form inputs, buttons, data tables, and alert modals, heavily featuring glassmorphic effects (translucency + background blur) and smooth hover animations.
+
+#### [NEW] `app/static/js/app.js` & `charts.js`
+`app.js` will handle fetching alerts from the `/alerts` backend endpoint and updating the notification bell in real-time.
+`charts.js` will contain the `Chart.js` initialization logic to draw graphs on the dashboard.
+
+---
+
+### 2. Base Layout & Components (`app/templates/`)
+
+#### [NEW] `app/templates/base.html`
+The master layout. It will include the `<head>` with links to Google Fonts, `Chart.js` CDN, and our CSS files. It will define the `<body>` structure enclosing the sidebar, navbar, and a `{% block content %}` area where other pages inject their data.
+
+#### [NEW] `app/templates/components/sidebar.html`
+The vertical navigation menu with links to Dashboard, Clinical Cases, Autopsies, Evidence, Court, and Reports.
+
+#### [NEW] `app/templates/components/navbar.html`
+The top horizontal bar featuring the current user's role/name, a dynamic notification bell (for alerts), and a secure logout button.
+
+---
+
+### 3. Core Application Views
+
+#### [NEW] `app/templates/login.html`
+A standalone page (does not inherit `base.html`). Will feature a centered, frosted-glass login card on a dark, atmospheric background to give a stunning first impression.
+
+#### [NEW] `app/templates/dashboard.html`
+The main analytics view. Will display statistical cards (e.g., Total Cases, Pending Reports) and canvas elements for `Chart.js` graphs.
+
+#### [NEW] `app/templates/clinical/list.html` & `form.html`
+`list.html` will display a beautifully styled data table of all clinical (living subject) cases.
+`form.html` will be the complex Medico-Legal Examination Form (MLEF) with clean inputs for patient demographics, injuries, and hospital BHT numbers.
+
+#### [NEW] `app/templates/autopsy/list.html` & `form.html`
+Similar to clinical, but `form.html` will capture Postmortem Report (PMR) data, including inquest details and cause of death fields.
+
+#### [NEW] `app/templates/evidence/transfer.html`
+A dedicated, user-friendly form for handling chain-of-custody transfers and submitting lab result files.
+
+#### [NEW] `app/templates/court/dispatch.html`
+A view for administrative staff to see pending court reports and upload court receipt PDFs.
+
+#### [NEW] `app/templates/reports/daily.html` & `pending.html`
+Clean, print-friendly table views for generating the requested daily and pending case reports.
+
+## Verification Plan
+
+### Manual Verification
+1. Open `http://localhost:5000/login` to verify the standalone login screen aesthetic.
+2. Log in and verify the `base.html` layout (sidebar + navbar) renders correctly.
+3. Check the Dashboard to ensure `Chart.js` renders the data fed from the backend.
+4. Navigate through all forms (Clinical, Autopsy, Evidence) to ensure CSS inputs look premium and that form submissions successfully hit the backend routes we built in Phase 5.
+5. Verify the notification bell fetches and displays alerts properly via `app.js`.

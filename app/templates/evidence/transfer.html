@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Evidence & Chain of Custody{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <div class="glass-card">
+        <h3 class="card-title">Transfer Evidence Custody</h3>
+        <form action="/evidence/transfer" method="POST">
+            <div class="form-group">
+                <label class="form-label">Evidence ID</label>
+                <input type="number" name="evidence_id" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">To User ID (Recipient)</label>
+                <input type="number" name="to_user_id" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Location (e.g. Lab 2, Cold Storage)</label>
+                <input type="text" name="location" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Record Transfer</button>
+        </form>
+    </div>
+    
+    <div class="glass-card">
+        <h3 class="card-title">Upload Lab Test Result</h3>
+        <form action="/evidence/result" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label class="form-label">Test Request ID</label>
+                <input type="number" name="request_id" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Result Document (PDF/Image)</label>
+                <input type="file" name="file" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Upload Result</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

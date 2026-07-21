@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Overview Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <div class="glass-card">
+        <h3 class="card-title">Monthly Clinical Cases</h3>
+        <div style="height: 250px;">
+            <canvas id="clinicalChart"></canvas>
+        </div>
+    </div>
+    
+    <div class="glass-card">
+        <h3 class="card-title">Monthly Autopsy Cases</h3>
+        <div style="height: 250px;">
+            <canvas id="autopsyChart"></canvas>
+        </div>
+    </div>
+    
+    <div class="glass-card">
+        <h3 class="card-title">Pending Court Reports</h3>
+        <div style="font-size: 3.5rem; font-weight: 700; color: var(--warning-color); text-align: center; margin-top: 50px;">
+            {% if stats and stats|length >= 3 and stats[2]|length > 0 %}
+                {{ stats[2][0]['pending_court_reports'] }}
+            {% else %}
+                0
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Extract data passed from backend (stats from sp_get_monthly_statistics)
+        {% if stats and stats|length >= 2 %}
+            const clinicalCount = {{ stats[0][0]['total_clinical'] if stats[0]|length > 0 else 0 }};
+            const autopsyCount = {{ stats[1][0]['total_autopsies'] if stats[1]|length > 0 else 0 }};
+        {% else %}
+            const clinicalCount = 0;
+            const autopsyCount = 0;
+        {% endif %}
+        
+        initDashboardChart('clinicalChart', ['This Month'], [clinicalCount], 'Clinical Cases');
+        initDashboardChart('autopsyChart', ['This Month'], [autopsyCount], 'Autopsy Cases');
+    });
+</script>
+{% endblock %}

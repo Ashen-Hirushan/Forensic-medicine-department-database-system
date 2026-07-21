@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Court Dispatches{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <div class="glass-card" style="grid-column: span 2;">
+        <h3 class="card-title">Pending Court Reports</h3>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Report ID</th>
+                        <th>Case Reference</th>
+                        <th>Type</th>
+                        <th>Draft Status</th>
+                        <th>Court Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pending %}
+                    <tr>
+                        <td>{{ p.report_id }}</td>
+                        <td>{{ p.clinical_case_id or p.autopsy_case_id }}</td>
+                        <td>{{ 'MLEF' if p.clinical_case_id else 'PMR' }}</td>
+                        <td><span class="user-role" style="background: hsla(45, 100%, 51%, 0.2); color: var(--warning-color);">{{ p.report_status or p.draft_status }}</span></td>
+                        <td>{{ p.court_date or 'TBD' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-muted);">All clear! No pending court reports.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="glass-card">
+        <h3 class="card-title">Log Court Receipt</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Upload the scanned court receipt PDF to finalize and lock the report.</p>
+        <form action="/court/receipt" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label class="form-label">Submission/Report ID</label>
+                <input type="number" name="submission_id" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Scanned Receipt PDF</label>
+                <input type="file" name="receipt" class="form-control" accept=".pdf" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Finalize Report</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

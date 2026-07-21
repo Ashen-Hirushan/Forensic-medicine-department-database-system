@@ -1,0 +1,26 @@
+<header class="navbar">
+    <div class="nav-left">
+        <div class="page-title">
+            {% block page_title %}Dashboard{% endblock %}
+        </div>
+    </div>
+    
+    <div class="nav-right">
+        <!-- Alerts Bell -->
+        <div class="bell-container">
+            <span class="bell-icon">🔔</span>
+            <span class="bell-badge" id="notification-badge">0</span>
+        </div>
+        
+        <!-- User Info -->
+        <div class="user-info">
+            {% if session.get('username') %}
+                <span class="user-role">{{ session.get('role_name', 'User') }}</span>
+                <span>{{ session.get('username') }}</span>
+                <a href="/logout" class="btn btn-danger" style="padding: 6px 12px; font-size: 0.8rem; margin-left: 10px;">Logout</a>
+            {% else %}
+                <a href="/login" class="btn btn-primary">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</header

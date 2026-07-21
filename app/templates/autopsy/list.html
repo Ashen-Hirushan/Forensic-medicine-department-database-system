@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Autopsy Cases{% endblock %}
+
+{% block content %}
+<div class="glass-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 class="card-title" style="margin: 0;">Recent Postmortem Investigations</h3>
+        <a href="/autopsy/new" class="btn btn-primary">+ Register New Autopsy</a>
+    </div>
+    
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Case ID</th>
+                    <th>PM Serial No</th>
+                    <th>Death Datetime</th>
+                    <th>Autopsy Date</th>
+                    <th>Inquest Ordered By</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for case in cases %}
+                <tr>
+                    <td>{{ case.case_id }}</td>
+                    <td>{{ case.pm_serial_no or 'N/A' }}</td>
+                    <td>{{ case.death_datetime or 'N/A' }}</td>
+                    <td>{{ case.autopsy_date or 'N/A' }}</td>
+                    <td>{{ case.inquest_ordered_by or 'N/A' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted);">No autopsy cases found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

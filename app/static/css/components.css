@@ -1,0 +1,181 @@
+/* Glassmorphism Cards */
+.glass-card {
+    background: var(--bg-card);
+    backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--glass-shadow);
+    transition: var(--transition-normal);
+}
+
+.glass-card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-main);
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    border: none;
+    outline: none;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 15px hsla(199, 89%, 48%, 0.4);
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px hsla(199, 89%, 48%, 0.5);
+}
+
+.btn-danger {
+    background: var(--error-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: hsl(354, 70%, 45%);
+}
+
+/* Form Inputs */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    background: hsla(220, 26%, 8%, 0.5);
+    border: 1px solid hsla(0, 0%, 100%, 0.15);
+    border-radius: 8px;
+    color: var(--text-main);
+    font-family: var(--font-family);
+    font-size: 1rem;
+    transition: var(--transition-fast);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px hsla(199, 89%, 48%, 0.2);
+}
+
+/* Data Tables */
+.table-container {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: var(--glass-border);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-card);
+}
+
+.data-table th, .data-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid hsla(0, 0%, 100%, 0.05);
+}
+
+.data-table th {
+    font-weight: 600;
+    color: var(--text-muted);
+    background: hsla(220, 26%, 10%, 0.8);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.data-table tr:hover td {
+    background: hsla(0, 0%, 100%, 0.02);
+}
+
+/* Alerts / Notifications */
+.alert-container {
+    margin-bottom: 24px;
+}
+
+.alert {
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: slideIn 0.3s ease forwards;
+}
+
+.alert-success {
+    background: hsla(142, 71%, 45%, 0.15);
+    border: 1px solid var(--success-color);
+    color: hsl(142, 71%, 75%);
+}
+
+.alert-error {
+    background: hsla(354, 70%, 54%, 0.15);
+    border: 1px solid var(--error-color);
+    color: hsl(354, 70%, 75%);
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Bell Notification */
+.bell-container {
+    position: relative;
+    cursor: pointer;
+}
+
+.bell-icon {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    transition: var(--transition-fast);
+}
+
+.bell-container:hover .bell-icon {
+    color: var(--text-main);
+}
+
+.bell-badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background: var(--error-color);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    display: none;
+}
