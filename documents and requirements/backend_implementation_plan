@@ -1,0 +1,91 @@
+# Phase 5: Backend Implementation Plan (Flask)
+
+This plan outlines the architecture and implementation steps for building the backend system of the Forensic Medical Department Database System. The application will be a server-side rendered (SSR) web application using Python (Flask) and Jinja2 templates, perfectly adhering to the provided `folder_structure`.
+
+## User Review Required
+
+> [!IMPORTANT]
+> The folder structure defines `templates/` and `static/`, implying a Server-Side Rendered (SSR) web app using Flask and Jinja2 templates rather than a decoupled REST API (e.g., separating a Python backend from a React/Vue frontend). This implementation plan will follow the SSR approach using Flask Blueprints to serve HTML. Please confirm if this matches your expectation!
+
+> [!WARNING]
+> For user authentication, we will use Flask's session management (server-side sessions) combined with `bcrypt` for password hashing, as this is the standard for secure SSR Flask apps.
+
+## Proposed Changes
+
+We will systematically build the core framework, the service layer, and the routing controllers according to your folder structure.
+
+### Core App & Configuration
+
+#### [NEW] `run.py`
+The main entry point. It will import the Flask app from the `app` package and start the development server.
+
+#### [NEW] `app/__init__.py`
+The App Factory. It will initialize the Flask application, configure session management, handle error pages, and register all route Blueprints (auth, dashboard, clinical, autopsy, etc.).
+
+#### [NEW] `app/config.py`
+The configuration loader. It will use `python-dotenv` to read `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` from your existing `.env` file, as well as define paths for the secure `uploads` folder (outside the static directory).
+
+---
+
+### Service Layer (Business Logic & DB)
+
+#### [NEW] `app/services/db.py`
+Will manage the MySQL connection pool using `mysql-connector-python`. It will provide helper functions to execute raw queries, fetch from Views (e.g., `view_daily_clinical_cases`), and execute your newly created Stored Procedures (e.g., `sp_register_clinical_case`, `sp_submit_test_result`).
+
+#### [NEW] `app/services/auth_utils.py`
+Will contain decorators like `@login_required` and `@roles_allowed(*roles)` to protect routes. It will handle the strict Role-Based Access Control (RBAC) required:
+*   **Administrator**: Full access to configs.
+*   **Clerk / Admin Staff**: Patient and Case registration, court report dispatches.
+*   **Doctor / JMO**: Clinical/Autopsy forms, draft reports.
+*   **Laboratory Staff**: Test results and evidence only.
+It will also include helper functions for `bcrypt` password verification.
+
+---
+
+### Routing Controllers (Flask Blueprints)
+
+These files will define your URL endpoints and handle HTTP GET (rendering templates) and POST (submitting forms) requests.
+
+#### [NEW] `app/routes/auth.py`
+- `GET /login`: Renders the login page.
+- `POST /login`: Validates credentials, sets up the session, and redirects to the dashboard.
+- `GET /logout`: Clears the session.
+
+#### [NEW] `app/routes/dashboard.py`
+- `GET /dashboard`: Protected route. Calls `sp_get_monthly_statistics` and queries `view_pending_court_reports` to pass data to `dashboard.html`.
+
+#### [NEW] `app/routes/clinical.py`
+- `GET /clinical`: Lists all clinical cases.
+- `GET /clinical/new`: Renders the MLEF form.
+- `POST /clinical/new`: Captures form data and calls `sp_register_clinical_case`.
+
+#### [NEW] `app/routes/autopsy.py`
+- `GET /autopsy`: Lists autopsy cases.
+- `GET /autopsy/new`: Renders the PMR and Cause of Death forms.
+- `POST /autopsy/new`: Calls `sp_register_autopsy_case`.
+
+#### [NEW] `app/routes/evidence.py`
+- `GET /evidence/transfer`: Renders chain of custody transfer form.
+- `POST /evidence/transfer`: Calls `sp_transfer_evidence_custody`.
+- `POST /evidence/result`: Handles lab result file uploads and calls `sp_submit_test_result`.
+
+#### [NEW] `app/routes/court.py`
+- `GET /court/dispatch`: Lists pending court reports.
+- `POST /court/receipt`: Handles PDF upload to `uploads/court_receipts/` and calls `sp_log_court_receipt`.
+
+#### [NEW] `app/routes/alerts.py` (Added based on requirements)
+- `GET /alerts`: Fetches pending user alerts (like "test completed" or "pending court date") from the `user_alerts` table for the logged-in doctor.
+- `POST /alerts/dismiss`: Marks an alert as read/dismissed.
+
+#### [NEW] `app/routes/reports.py` (Added based on requirements)
+- `GET /reports/daily`: Retrieves chronological logs of cases registered in the last 24 hours.
+- `GET /reports/pending`: Retrieves cases awaiting lab results or pending court dates.
+
+## Verification Plan
+
+### Manual Verification
+1.  Run `python run.py`.
+2.  Navigate to `http://localhost:5000/login` in the browser.
+3.  Test user authentication (after seeding a mock user).
+4.  Verify that submitting a new clinical case form correctly executes `sp_register_clinical_case` and writes to the database.
+5.  Verify that uploading a court receipt saves the PDF in the secure `uploads` folder and updates the DB via `sp_log_court_receipt`.
