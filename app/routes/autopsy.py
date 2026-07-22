@@ -148,9 +148,31 @@ def detail_autopsy(case_id):
         "SELECT * FROM court_submissions WHERE autopsy_case_id = %s", (case_id,)
     )
     
+    # Peer reviews
+    peer_reviews = execute_query("""
+        SELECT pr.review_id, sd.full_name AS reviewer_name
+        FROM peer_reviews pr
+        JOIN medical_officers mo ON pr.reviewed_by_doctor_id = mo.doctor_id
+        JOIN staff_directory sd ON mo.staff_id = sd.staff_id
+        WHERE pr.autopsy_case_id = %s
+    """, (case_id,))
+    
+    # Physical evidence
+    evidence = execute_query(
+        "SELECT * FROM physical_evidence WHERE autopsy_case_id = %s", (case_id,)
+    )
+    
+    # Doctors for peer review dropdown
+    doctors = execute_query("""
+        SELECT mo.doctor_id, sd.full_name 
+        FROM medical_officers mo 
+        JOIN staff_directory sd ON mo.staff_id = sd.staff_id
+    """)
+    
     return render_template('autopsy/detail.html', case=case, pmr=pmr, cod=cod,
                            wounds=wounds, investigations=investigations,
-                           photos=photos, dictations=dictations, court=court)
+                           photos=photos, dictations=dictations, court=court,
+                           peer_reviews=peer_reviews, evidence=evidence, doctors=doctors)
 
 # ---------------------------------------------------------------------------
 # COD — Cause of Death form
@@ -317,5 +339,56 @@ def upload_photo(case_id):
         flash("Photo uploaded successfully!", "success")
     except Exception as e:
         flash(f"Error uploading photo: {str(e)}", "error")
+    
+    return redirect(f'/autopsy/{case_id}')
+
+# ---------------------------------------------------------------------------
+# PEER REVIEWS — Add peer review for autopsy case
+# ---------------------------------------------------------------------------
+@autopsy_bp.route('/<int:case_id>/peer-review', methods=['POST'])
+@login_required
+@roles_allowed('Admin', 'Doctor')
+def add_peer_review(case_id):
+    try:
+        execute_query("""
+            INSERT INTO peer_reviews (autopsy_case_id, reviewed_by_doctor_id)
+            VALUES (%s, %s)
+        """, (case_id, request.form.get('reviewed_by_doctor_id')))
+        flash("Peer review recorded!", "success")
+    except Exception as e:
+        flash(f"Error adding peer review: {str(e)}", "error")
+    return redirect(f'/autopsy/{case_id}')
+
+# ---------------------------------------------------------------------------
+# VOICE DICTATIONS — Upload audio dictation for autopsy
+# ---------------------------------------------------------------------------
+@autopsy_bp.route('/<int:case_id>/dictations', methods=['POST'])
+@login_required
+@roles_allowed('Admin', 'Doctor')
+def upload_dictation(case_id):
+    if 'audio_file' not in request.files:
+        flash("No file selected.", "error")
+        return redirect(f'/autopsy/{case_id}')
+    
+    file = request.files['audio_file']
+    if file.filename == '':
+        flash("No file selected.", "error")
+        return redirect(f'/autopsy/{case_id}')
+    
+    try:
+        filename = secure_filename(file.filename)
+        case_dir = os.path.join(current_app.config['UPLOADS_DIR'], f'dictation_{case_id}')
+        os.makedirs(case_dir, exist_ok=True)
+        filepath = os.path.join(case_dir, filename)
+        file.save(filepath)
+        
+        execute_query("""
+            INSERT INTO voice_dictations (autopsy_case_id, audio_file_path, transcript_text)
+            VALUES (%s, %s, %s)
+        """, (case_id, filepath, request.form.get('transcript_text', '')))
+        
+        flash("Voice dictation uploaded!", "success")
+    except Exception as e:
+        flash(f"Error uploading dictation: {str(e)}", "error")
     
     return redirect(f'/autopsy/{case_id}')

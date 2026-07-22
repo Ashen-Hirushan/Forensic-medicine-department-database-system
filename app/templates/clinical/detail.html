@@ -66,6 +66,8 @@
     <button class="tab-btn" onclick="switchTab(event, 'investigations')">Investigations</button>
     <button class="tab-btn" onclick="switchTab(event, 'referrals')">Referrals</button>
     <button class="tab-btn" onclick="switchTab(event, 'photos')">Photos</button>
+    <button class="tab-btn" onclick="switchTab(event, 'evidence')">Evidence</button>
+    <button class="tab-btn" onclick="switchTab(event, 'peer-reviews')">Peer Reviews</button>
     <button class="tab-btn" onclick="switchTab(event, 'court')">Court & Reports</button>
 </div>
 
@@ -380,6 +382,58 @@
             <div class="empty-msg">No court submissions for this case.</div>
             {% endif %}
         </div>
+    </div>
+</div>
+
+<!-- ===================== TAB: EVIDENCE ===================== -->
+<div id="evidence" class="tab-panel">
+    <div class="card">
+        <div class="section-title">🧬 Physical Evidence</div>
+        {% if evidence %}
+        <table class="mini-table">
+            <thead><tr><th>ID</th><th>Description</th></tr></thead>
+            <tbody>
+                {% for ev in evidence %}
+                <tr><td>#{{ ev.evidence_id }}</td><td>{{ ev.description or '—' }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-msg">No physical evidence registered for this case.</div>
+        {% endif %}
+        <p style="margin-top: 16px; font-size: 13px; color: #6b7280;">To register new evidence, go to <a href="/evidence/transfer" style="color: #2563eb;">Evidence & Labs</a>.</p>
+    </div>
+</div>
+
+<!-- ===================== TAB: PEER REVIEWS ===================== -->
+<div id="peer-reviews" class="tab-panel">
+    <div class="card">
+        <div class="section-title">👥 Peer Reviews</div>
+        {% if peer_reviews %}
+        <table class="mini-table">
+            <thead><tr><th>#</th><th>Reviewed By</th></tr></thead>
+            <tbody>
+                {% for pr in peer_reviews %}
+                <tr><td>{{ loop.index }}</td><td>Dr. {{ pr.reviewer_name }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-msg">No peer reviews recorded yet.</div>
+        {% endif %}
+        
+        <form action="/clinical/{{ case.case_id }}/peer-review" method="POST" class="inline-form">
+            <div class="form-group">
+                <label class="form-label">Reviewing Doctor</label>
+                <select name="reviewed_by_doctor_id" class="form-control" required>
+                    <option value="">— Select Doctor —</option>
+                    {% for d in doctors %}
+                    <option value="{{ d.doctor_id }}">Dr. {{ d.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="height: fit-content;">+ Add Review</button>
+        </form>
     </div>
 </div>
 

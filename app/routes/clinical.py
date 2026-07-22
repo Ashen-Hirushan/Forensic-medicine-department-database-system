@@ -159,10 +159,32 @@ def detail_clinical(case_id):
         "SELECT * FROM court_submissions WHERE clinical_case_id = %s", (case_id,)
     )
     
+    # Peer reviews
+    peer_reviews = execute_query("""
+        SELECT pr.review_id, sd.full_name AS reviewer_name
+        FROM peer_reviews pr
+        JOIN medical_officers mo ON pr.reviewed_by_doctor_id = mo.doctor_id
+        JOIN staff_directory sd ON mo.staff_id = sd.staff_id
+        WHERE pr.clinical_case_id = %s
+    """, (case_id,))
+    
+    # Physical evidence
+    evidence = execute_query(
+        "SELECT * FROM physical_evidence WHERE clinical_case_id = %s", (case_id,)
+    )
+    
+    # Doctors for peer review dropdown
+    doctors = execute_query("""
+        SELECT mo.doctor_id, sd.full_name 
+        FROM medical_officers mo 
+        JOIN staff_directory sd ON mo.staff_id = sd.staff_id
+    """)
+    
     return render_template('clinical/detail.html', case=case, mlef=mlef, mlr=mlr,
                            observations=observations, wounds=wounds,
                            investigations=investigations, referrals=referrals,
-                           photos=photos, court=court)
+                           photos=photos, court=court, peer_reviews=peer_reviews,
+                           evidence=evidence, doctors=doctors)
 
 # ---------------------------------------------------------------------------
 # MLEF — Edit MLEF record for a clinical case
@@ -466,3 +488,20 @@ def edit_mlr(case_id):
     
     return render_template('clinical/mlr_form.html', case=case, mlr=mlr, mlef=mlef,
                            wounds=wounds, observations=observations, case_id=case_id)
+
+# ---------------------------------------------------------------------------
+# PEER REVIEWS — Add peer review for clinical case
+# ---------------------------------------------------------------------------
+@clinical_bp.route('/<int:case_id>/peer-review', methods=['POST'])
+@login_required
+@roles_allowed('Admin', 'Doctor')
+def add_peer_review(case_id):
+    try:
+        execute_query("""
+            INSERT INTO peer_reviews (clinical_case_id, reviewed_by_doctor_id)
+            VALUES (%s, %s)
+        """, (case_id, request.form.get('reviewed_by_doctor_id')))
+        flash("Peer review recorded!", "success")
+    except Exception as e:
+        flash(f"Error adding peer review: {str(e)}", "error")
+    return redirect(f'/clinical/{case_id}')

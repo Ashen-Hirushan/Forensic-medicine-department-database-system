@@ -3,56 +3,171 @@
 {% block page_title %}Court Dispatches{% endblock %}
 
 {% block content %}
-<!-- Pending Reports Table -->
-<div class="card" style="margin-bottom: var(--space-6);">
-    <h3 class="card-title">Pending Court Reports</h3>
-    <div class="table-container">
-        <table class="data-table">
+<style>
+    .ct-tabs { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 24px; }
+    .ct-tab { padding: 10px 18px; font-size: 13px; font-weight: 600; color: #6b7280; background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+    .ct-tab:hover { color: #374151; }
+    .ct-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+    .ct-panel { display: none; }
+    .ct-panel.active { display: block; }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .mini-table th { background: #f9fafb; padding: 8px 12px; text-align: left; font-weight: 600; color: #6b7280; text-transform: uppercase; font-size: 11px; border-bottom: 1px solid #e5e7eb; }
+    .mini-table td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; color: #374151; }
+    .empty-msg { text-align: center; padding: 24px; color: #9ca3af; font-style: italic; }
+</style>
+
+<div class="card">
+    <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">⚖️ Court Submissions & Dispatches</h2>
+
+    <div class="ct-tabs">
+        <button class="ct-tab active" onclick="switchCtTab(event, 'all-sub')">📋 All Submissions</button>
+        <button class="ct-tab" onclick="switchCtTab(event, 'pending-sub')">⏳ Pending Receipts ({{ pending|length }})</button>
+        <button class="ct-tab" onclick="switchCtTab(event, 'new-sub')">➕ New Submission</button>
+        <button class="ct-tab" onclick="switchCtTab(event, 'receipt-upload')">📤 Upload Receipt</button>
+    </div>
+
+    <!-- =================== TAB: ALL SUBMISSIONS =================== -->
+    <div id="all-sub" class="ct-panel active">
+        {% if submissions %}
+        <table class="mini-table">
             <thead>
-                <tr>
-                    <th>Report ID</th>
-                    <th>Case Reference</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Court Date</th>
-                </tr>
+                <tr><th>ID</th><th>Case</th><th>Type</th><th>Court</th><th>Trial Date</th><th>Receipt</th></tr>
             </thead>
             <tbody>
-                {% for p in pending %}
+                {% for s in submissions %}
                 <tr>
-                    <td>{{ p.report_id }}</td>
-                    <td>{{ p.clinical_case_id or p.autopsy_case_id }}</td>
-                    <td>{{ 'MLEF' if p.clinical_case_id else 'PMR' }}</td>
-                    <td><span class="badge badge-warning">{{ p.report_status or p.draft_status or 'Pending' }}</span></td>
-                    <td>{{ p.court_date or 'TBD' }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="5" class="empty-state">All clear — no pending court reports.</td>
+                    <td style="font-weight: 600;">#{{ s.submission_id }}</td>
+                    <td><span style="color: #2563eb; font-weight: 500;">{{ s.case_ref or '—' }}</span></td>
+                    <td>
+                        {% if s.case_type == 'Clinical' %}
+                            <span class="badge badge-info">Clinical</span>
+                        {% else %}
+                            <span class="badge badge-warning">Autopsy</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ s.court_name or '—' }}</td>
+                    <td>{{ s.trial_date.strftime('%b %d, %Y') if s.trial_date else '—' }}</td>
+                    <td>
+                        {% if s.receipt_scan_path %}
+                            <span class="badge badge-success">✅ Received</span>
+                        {% else %}
+                            <span class="badge badge-error">❌ Pending</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <div class="empty-msg">No court submissions found.</div>
+        {% endif %}
+    </div>
+
+    <!-- =================== TAB: PENDING RECEIPTS =================== -->
+    <div id="pending-sub" class="ct-panel">
+        {% if pending %}
+        <table class="mini-table">
+            <thead>
+                <tr><th>ID</th><th>Case</th><th>Court</th><th>Trial Date</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                {% for s in pending %}
+                <tr>
+                    <td style="font-weight: 600;">#{{ s.submission_id }}</td>
+                    <td><span style="color: #2563eb;">{{ s.case_ref or '—' }}</span></td>
+                    <td>{{ s.court_name or '—' }}</td>
+                    <td>{{ s.trial_date.strftime('%b %d, %Y') if s.trial_date else '—' }}</td>
+                    <td>
+                        <form action="/court/receipt" method="POST" enctype="multipart/form-data" style="display: flex; gap: 6px; align-items: center;">
+                            <input type="hidden" name="submission_id" value="{{ s.submission_id }}">
+                            <input type="file" name="receipt" accept=".pdf,.jpg,.png" style="font-size: 12px; max-width: 180px;" required>
+                            <button type="submit" class="btn btn-primary btn-sm">Upload</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-msg">No pending receipts. All submissions have been acknowledged by court.</div>
+        {% endif %}
+    </div>
+
+    <!-- =================== TAB: NEW SUBMISSION =================== -->
+    <div id="new-sub" class="ct-panel">
+        <div style="max-width: 500px;">
+            <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 16px;">Create New Court Submission</h3>
+            <form action="/court/new" method="POST">
+                <div class="form-group">
+                    <label class="form-label">Case Type</label>
+                    <select name="case_type" class="form-control" id="ct-case-type" onchange="updateCtCaseDropdown()">
+                        <option value="clinical">Clinical</option>
+                        <option value="autopsy">Autopsy</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Case</label>
+                    <select name="case_id" class="form-control" id="ct-case-id">
+                        {% for c in clinical_cases %}
+                        <option value="{{ c.case_id }}" data-type="clinical">{{ c.reference_no }}</option>
+                        {% endfor %}
+                        {% for a in autopsy_cases %}
+                        <option value="{{ a.case_id }}" data-type="autopsy" style="display:none;">{{ a.pm_serial_no }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Court Name</label>
+                    <input type="text" name="court_name" class="form-control" placeholder="e.g. Kandy Magistrate's Court" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Trial Date</label>
+                    <input type="datetime-local" name="trial_date" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">📨 Create Submission</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- =================== TAB: RECEIPT UPLOAD =================== -->
+    <div id="receipt-upload" class="ct-panel">
+        <div style="max-width: 500px;">
+            <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 16px;">Upload Court Receipt</h3>
+            <form action="/court/receipt" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label class="form-label">Submission ID</label>
+                    <select name="submission_id" class="form-control" required>
+                        <option value="">— Select Submission —</option>
+                        {% for s in pending %}
+                        <option value="{{ s.submission_id }}">#{{ s.submission_id }} — {{ s.case_ref }} ({{ s.court_name }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Receipt Scan</label>
+                    <input type="file" name="receipt" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                    <span class="form-hint">Accepted formats: PDF, JPG, PNG</span>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">📤 Upload Receipt</button>
+            </form>
+        </div>
     </div>
 </div>
 
-<!-- Upload Receipt -->
-<div class="card" style="max-width: 500px;">
-    <h3 class="card-title">Log Court Receipt</h3>
-    <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-5);">
-        Upload the scanned court receipt PDF to finalize and lock the associated report.
-    </p>
-    <form action="/court/receipt" method="POST" enctype="multipart/form-data">
-        <div class="form-group">
-            <label class="form-label">Submission / Report ID</label>
-            <input type="number" name="submission_id" class="form-control" placeholder="e.g. 1" required>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Scanned Receipt PDF</label>
-            <input type="file" name="receipt" class="form-control" accept=".pdf" required>
-            <span class="form-hint">Only PDF files are accepted.</span>
-        </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Finalize Report</button>
-    </form>
-</div>
+<script>
+function switchCtTab(e, tabId) {
+    document.querySelectorAll('.ct-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.ct-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+}
+function updateCtCaseDropdown() {
+    const type = document.getElementById('ct-case-type').value;
+    document.querySelectorAll('#ct-case-id option').forEach(opt => {
+        opt.style.display = opt.dataset.type === type ? '' : 'none';
+    });
+    const first = document.querySelector('#ct-case-id option[data-type="' + type + '"]');
+    if (first) first.selected = true;
+}
+</script>
 {% endblock %}

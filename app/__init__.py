@@ -28,6 +28,7 @@ def create_app(config_class=Config):
     from app.routes.court import court_bp
     from app.routes.alerts import alerts_bp
     from app.routes.reports import reports_bp
+    from app.routes.admin import admin_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -37,6 +38,7 @@ def create_app(config_class=Config):
     app.register_blueprint(court_bp, url_prefix='/court')
     app.register_blueprint(alerts_bp, url_prefix='/alerts')
     app.register_blueprint(reports_bp, url_prefix='/reports')
+    app.register_blueprint(admin_bp, url_prefix='/admin')
 
     # Redirect root to login
     from flask import redirect
