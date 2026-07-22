@@ -23,7 +23,7 @@ def transfer_evidence():
 
 @evidence_bp.route('/result', methods=['POST'])
 @login_required
-@roles_allowed('Administrator', 'Laboratory Staff')
+@roles_allowed('Admin', 'Lab Staff')
 def submit_result():
     if 'file' not in request.files:
         flash("No file part", "error")

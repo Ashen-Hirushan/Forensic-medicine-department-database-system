@@ -38,9 +38,10 @@ def create_app(config_class=Config):
     app.register_blueprint(alerts_bp, url_prefix='/alerts')
     app.register_blueprint(reports_bp, url_prefix='/reports')
 
-    # A simple healthcheck route for now
+    # Redirect root to login
+    from flask import redirect
     @app.route('/')
     def index():
-        return "Forensic Medical Department Database System - Backend is Running!"
+        return redirect('/login')
 
     return app

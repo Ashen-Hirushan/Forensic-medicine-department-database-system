@@ -1,26 +1,38 @@
 <header class="navbar">
     <div class="nav-left">
-        <div class="page-title">
-            {% block page_title %}Dashboard{% endblock %}
-        </div>
+        <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
     </div>
-    
+
     <div class="nav-right">
-        <!-- Alerts Bell -->
-        <div class="bell-container">
+        <!-- Notification Bell -->
+        <div class="bell-container" id="bell-container" title="Notifications">
             <span class="bell-icon">🔔</span>
             <span class="bell-badge" id="notification-badge">0</span>
+            
+            <div class="bell-dropdown" id="bell-dropdown">
+                <div class="dropdown-header">System Alerts</div>
+                <div class="dropdown-list" id="dropdown-list">
+                    <div class="dropdown-empty">No active alerts</div>
+                </div>
+            </div>
         </div>
-        
+
         <!-- User Info -->
         <div class="user-info">
             {% if session.get('username') %}
                 <span class="user-role">{{ session.get('role_name', 'User') }}</span>
-                <span>{{ session.get('username') }}</span>
-                <a href="/logout" class="btn btn-danger" style="padding: 6px 12px; font-size: 0.8rem; margin-left: 10px;">Logout</a>
+                <a href="/profile" style="display: flex; align-items: center; gap: var(--space-2); color: var(--text-primary); text-decoration: none; font-weight: 500;">
+                    {% if session.get('profile_picture') and session.get('profile_picture') != 'default.png' %}
+                        <img src="{{ url_for('static', filename='uploads/profiles/' + session.get('profile_picture')) }}" alt="" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;">
+                    {% else %}
+                        <span style="font-size: 1.2rem;">👤</span>
+                    {% endif %}
+                    {{ session.get('username') }}
+                </a>
+                <a href="/logout" class="btn btn-secondary btn-sm">Logout</a>
             {% else %}
-                <a href="/login" class="btn btn-primary">Login</a>
+                <a href="/login" class="btn btn-primary btn-sm">Login</a>
             {% endif %}
         </div>
     </div>
-</header
+</header>

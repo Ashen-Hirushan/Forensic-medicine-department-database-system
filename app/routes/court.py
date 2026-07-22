@@ -8,14 +8,14 @@ court_bp = Blueprint('court', __name__)
 
 @court_bp.route('/dispatch', methods=['GET'])
 @login_required
-@roles_allowed('Administrator', 'Clerk / Admin Staff')
+@roles_allowed('Admin', 'Clerk')
 def dispatch_list():
     pending = execute_query("SELECT * FROM view_pending_court_reports")
     return render_template('court/dispatch.html', pending=pending)
 
 @court_bp.route('/receipt', methods=['POST'])
 @login_required
-@roles_allowed('Administrator', 'Clerk / Admin Staff')
+@roles_allowed('Admin', 'Clerk')
 def upload_receipt():
     if 'receipt' not in request.files:
         flash("No file part", "error")

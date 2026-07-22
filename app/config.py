@@ -26,6 +26,7 @@ class Config:
     COURT_RECEIPTS_DIR = os.path.join(UPLOADS_DIR, 'court_receipts')
     CRIME_SCENES_DIR = os.path.join(UPLOADS_DIR, 'crime_scenes')
     CONSENT_SCANS_DIR = os.path.join(UPLOADS_DIR, 'consent_scans')
+    PROFILES_DIR = os.path.join(BASE_DIR, 'app', 'static', 'uploads', 'profiles')
 
     @classmethod
     def init_app(cls):
@@ -33,3 +34,4 @@ class Config:
         os.makedirs(cls.COURT_RECEIPTS_DIR, exist_ok=True)
         os.makedirs(cls.CRIME_SCENES_DIR, exist_ok=True)
         os.makedirs(cls.CONSENT_SCANS_DIR, exist_ok=True)
+        os.makedirs(cls.PROFILES_DIR, exist_ok=True)

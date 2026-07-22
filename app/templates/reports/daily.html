@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 
-{% block page_title %}Daily Clinical Report{% endblock %}
+{% block page_title %}Daily Report{% endblock %}
 
 {% block content %}
-<div class="glass-card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 class="card-title" style="margin: 0;">Daily Clinical Cases</h3>
-        <button onclick="window.print()" class="btn btn-primary">Print Report</button>
+<div class="card">
+    <div class="page-header">
+        <h2>Daily Clinical Cases</h2>
+        <button onclick="window.print()" class="btn btn-secondary">🖨️ Print Report</button>
     </div>
-    
+
     <div class="table-container">
         <table class="data-table">
             <thead>
@@ -24,27 +24,18 @@
                 {% for case in cases %}
                 <tr>
                     <td>{{ case.case_id }}</td>
-                    <td>{{ case.reference_no or 'N/A' }}</td>
-                    <td>{{ case.hospital_bht_no or 'N/A' }}</td>
-                    <td>{{ case.incident_date or 'N/A' }}</td>
-                    <td>{{ case.admission_date or 'N/A' }}</td>
+                    <td>{{ case.reference_no or '—' }}</td>
+                    <td>{{ case.hospital_bht_no or '—' }}</td>
+                    <td>{{ case.incident_date or '—' }}</td>
+                    <td>{{ case.admission_date or '—' }}</td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="5" style="text-align: center; color: var(--text-muted);">No cases logged recently.</td>
+                    <td colspan="5" class="empty-state">No cases logged recently.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
-<style>
-    @media print {
-        .sidebar, .navbar, .btn { display: none !important; }
-        .glass-card { box-shadow: none; border: none; background: white; color: black; }
-        .data-table th, .data-table td { border-bottom: 1px solid #ccc; color: black; }
-        body { background: white; color: black; }
-    }
-</style>
 {% endblock %}

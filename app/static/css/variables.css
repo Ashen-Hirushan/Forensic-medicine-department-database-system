@@ -1,39 +1,77 @@
-/* Core Design Tokens */
+/* =============================================
+   VARIABLES.CSS - Core Design Tokens
+   Professional Management System Theme
+   ============================================= */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* Color Palette - Dark Mode with Forensic Blue/Teal accents */
-    --bg-dark: hsl(220, 26%, 14%);
-    --bg-card: hsla(222, 47%, 11%, 0.6);
-    --bg-card-hover: hsla(222, 47%, 16%, 0.8);
-    
-    --primary-color: hsl(199, 89%, 48%); /* Bright Teal/Blue */
-    --primary-hover: hsl(199, 89%, 40%);
-    
-    --secondary-color: hsl(230, 40%, 25%);
-    
-    --text-main: hsl(210, 40%, 98%);
-    --text-muted: hsl(215, 20%, 65%);
-    
-    --success-color: hsl(142, 71%, 45%);
-    --error-color: hsl(354, 70%, 54%);
-    --warning-color: hsl(45, 100%, 51%);
+    /* Background */
+    --bg-main: #f0f2f5;
+    --bg-card: #ffffff;
+
+    /* Primary Brand - Professional Blue */
+    --primary-color: #1a73e8;
+    --primary-hover: #1557b0;
+    --primary-light: #e8f0fe;
+
+    /* Sidebar */
+    --sidebar-bg: #1e293b;
+    --sidebar-text: #94a3b8;
+    --sidebar-active-bg: rgba(255, 255, 255, 0.08);
+    --sidebar-active-text: #ffffff;
+    --sidebar-hover-bg: rgba(255, 255, 255, 0.04);
+
+    /* Text */
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+
+    /* Status Colors */
+    --success: #059669;
+    --success-bg: #ecfdf5;
+    --success-border: #a7f3d0;
+    --error: #dc2626;
+    --error-bg: #fef2f2;
+    --error-border: #fecaca;
+    --warning: #d97706;
+    --warning-bg: #fffbeb;
+    --warning-border: #fde68a;
+    --info: #2563eb;
+    --info-bg: #eff6ff;
+    --info-border: #bfdbfe;
+
+    /* Borders & Shadows */
+    --border-color: #e5e7eb;
+    --border-radius: 8px;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
 
     /* Typography */
-    --font-family: 'Inter', sans-serif;
-    --font-size-base: 16px;
-    
-    /* Glassmorphism */
-    --glass-border: 1px solid hsla(0, 0%, 100%, 0.1);
-    --glass-blur: blur(12px);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.8125rem;
+    --font-size-base: 0.875rem;
+    --font-size-lg: 1rem;
+    --font-size-xl: 1.125rem;
+    --font-size-2xl: 1.5rem;
+
+    /* Spacing */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+
     /* Transitions */
-    --transition-fast: 0.2s ease;
-    --transition-normal: 0.3s ease;
+    --transition-fast: 150ms ease;
+    --transition-normal: 200ms ease;
 }
 
-* {
+/* Reset */
+*, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -41,9 +79,14 @@
 
 body {
     font-family: var(--font-family);
-    background-color: var(--bg-dark);
-    color: var(--text-main);
-    line-height: 1.6;
+    font-size: var(--font-size-base);
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    line-height: 1.5;
     min-height: 100vh;
-    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
+
+a { color: var(--primary-color); text-decoration: none; }
+a:hover { text-decoration: underline; }

@@ -1,38 +1,46 @@
 {% extends 'base.html' %}
 
-{% block page_title %}Evidence & Chain of Custody{% endblock %}
+{% block page_title %}Evidence & Labs{% endblock %}
 
 {% block content %}
-<div class="dashboard-grid">
-    <div class="glass-card">
+<div class="two-col-grid">
+    <div class="card">
         <h3 class="card-title">Transfer Evidence Custody</h3>
+        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-5);">
+            Record the handover of physical evidence between staff members.
+        </p>
         <form action="/evidence/transfer" method="POST">
             <div class="form-group">
                 <label class="form-label">Evidence ID</label>
-                <input type="number" name="evidence_id" class="form-control" required>
+                <input type="number" name="evidence_id" class="form-control" placeholder="e.g. 1" required>
             </div>
             <div class="form-group">
-                <label class="form-label">To User ID (Recipient)</label>
-                <input type="number" name="to_user_id" class="form-control" required>
+                <label class="form-label">Recipient (User ID)</label>
+                <input type="number" name="to_user_id" class="form-control" placeholder="e.g. 5" required>
+                <span class="form-hint">Enter the User ID of the person receiving the evidence.</span>
             </div>
             <div class="form-group">
-                <label class="form-label">Location (e.g. Lab 2, Cold Storage)</label>
-                <input type="text" name="location" class="form-control" required>
+                <label class="form-label">Storage Location</label>
+                <input type="text" name="location" class="form-control" placeholder="e.g. Toxicology Lab, Fridge A" required>
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%;">Record Transfer</button>
         </form>
     </div>
-    
-    <div class="glass-card">
+
+    <div class="card">
         <h3 class="card-title">Upload Lab Test Result</h3>
+        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-5);">
+            Attach laboratory result documents (PDF or image) to a test request.
+        </p>
         <form action="/evidence/result" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label class="form-label">Test Request ID</label>
-                <input type="number" name="request_id" class="form-control" required>
+                <input type="number" name="request_id" class="form-control" placeholder="e.g. 1" required>
             </div>
             <div class="form-group">
-                <label class="form-label">Result Document (PDF/Image)</label>
-                <input type="file" name="file" class="form-control" required>
+                <label class="form-label">Result Document</label>
+                <input type="file" name="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                <span class="form-hint">Accepted formats: PDF, JPG, PNG</span>
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%;">Upload Result</button>
         </form>

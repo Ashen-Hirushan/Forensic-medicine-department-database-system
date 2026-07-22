@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block page_title %}PM Register{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 600;">🔬 Postmortem Register</h2>
+        <form method="GET" style="display: flex; gap: 8px;">
+            <input type="text" name="search" class="form-control" placeholder="Search PM serial, cadaver name..." 
+                   value="{{ search }}" style="padding: 5px 10px; font-size: 13px; min-width: 260px;">
+            <button type="submit" class="btn btn-primary btn-sm">🔍 Search</button>
+            {% if search %}
+            <a href="/reports/pm-register" class="btn btn-secondary btn-sm">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>PM Serial No</th>
+                    <th>Cadaver Name</th>
+                    <th>Age/Gender</th>
+                    <th>Manner of Death</th>
+                    <th>Inquest By</th>
+                    <th>Doctor</th>
+                    <th>PMR Status</th>
+                    <th>Autopsy Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td><a href="/autopsy/{{ r.case_id }}" style="color: #2563eb; text-decoration: none; font-weight: 600;">{{ r.pm_serial_no }}</a></td>
+                    <td style="font-weight: 500;">{{ r.cadaver_name or 'Unidentified' }}</td>
+                    <td>~{{ r.estimated_age or '—' }} / {{ r.gender or '—' }}</td>
+                    <td>
+                        {% if r.manner_of_death == 'Homicidal' %}
+                            <span class="badge badge-error">{{ r.manner_of_death }}</span>
+                        {% elif r.manner_of_death == 'Suicidal' %}
+                            <span class="badge badge-warning">{{ r.manner_of_death }}</span>
+                        {% elif r.manner_of_death == 'Accidental' %}
+                            <span class="badge badge-info">{{ r.manner_of_death }}</span>
+                        {% elif r.manner_of_death %}
+                            <span class="badge badge-success">{{ r.manner_of_death }}</span>
+                        {% else %}
+                            <span style="color: #9ca3af;">—</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ r.inquest_ordered_by or '—' }}</td>
+                    <td>{{ r.doctor_name or '—' }}</td>
+                    <td>
+                        {% if r.draft_status == 'Received by Court' %}
+                            <span class="badge badge-success">Received</span>
+                        {% elif r.draft_status == 'Dispatched' %}
+                            <span class="badge badge-success">Dispatched</span>
+                        {% elif r.draft_status == 'PMR/MLEF Drafted' %}
+                            <span class="badge badge-info">Drafted</span>
+                        {% else %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ r.autopsy_date.strftime('%b %d, %Y') if r.autopsy_date else '—' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="empty-state">No postmortem records found{{ ' matching "' + search + '"' if search else '' }}.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

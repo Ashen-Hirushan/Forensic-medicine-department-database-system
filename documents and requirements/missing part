@@ -1,0 +1,172 @@
+# 🔍 Gap Analysis: Forensic Medicine Department Database System
+**Based on Dr. Chathula Wickramasinghe's Requirements (Act. Consultant JMO, UoP)**
+
+---
+
+## Summary Scoreboard
+
+| Area | Required Features | Implemented | Partially Done | Missing | Coverage |
+|------|:-:|:-:|:-:|:-:|:-:|
+| **Clinical Component** | 14 | 4 | 3 | 7 | ~36% |
+| **Autopsy Component** | 15 | 3 | 3 | 9 | ~30% |
+| **Shared / Cross-Cutting** | 8 | 2 | 2 | 4 | ~37% |
+| **Total** | **37** | **9** | **8** | **20** | **~35%** |
+
+> [!WARNING]
+> The system currently covers roughly **35%** of the stated requirements. The database schema (28 tables) is well-designed and supports most features, but the **web application layer** (routes, templates, UI pages) only exposes a fraction of that data.
+
+---
+
+## 1. Clinical Forensic Component
+
+### ✅ Implemented
+| # | Feature | Status | Where |
+|---|---------|--------|-------|
+| 1 | Register clinical case with patient demographics | ✅ Done | [clinical.py](file:///d:/4th%20sem/database/New%20project/app/routes/clinical.py), [form.html](file:///d:/4th%20sem/database/New%20project/app/templates/clinical/form.html) |
+| 2 | MLEF record auto-created on case registration | ✅ Done | [sp_register_clinical_case](file:///d:/4th%20sem/database/New%20project/database/procedures.sql#L12-L61) |
+| 3 | Link to Healthcare Facility & Police Station | ✅ Done | Form has dropdowns for `facility_id`, `station_id` |
+| 4 | Hospital BHT number tracking | ✅ Done | Field in clinical form |
+
+### ⚠️ Partially Implemented (Schema exists but NO UI)
+| # | Feature | Gap Detail |
+|---|---------|------------|
+| 5 | **MLEF data entry** (injury details, consent, wound types, category of hurt, alcohol status, accompanying officer) | DB table `mlef_records` has all these columns, but **NO form/page exists** to fill them in. The blank MLEF is auto-created but never editable. |
+| 6 | **MLR document management** (report status tracking) | DB table `mlr_documents` exists with status ENUM, but **NO UI** to view/update MLR status |
+| 7 | **Clinical observations** (encrypted findings) | DB table `clinical_observations` exists, but **NO route or form** to add findings |
+
+### ❌ Completely Missing
+| # | Feature | Impact |
+|---|---------|--------|
+| 8 | **Case type classification** (Trauma, Domestic abuse, Sexual abuse, Child abuse, Detainees, Drug addicts, Age estimation, DNA samples) | No way to categorize clinical cases by referral type. Schema lacks a `case_category` or `examination_type` field. |
+| 9 | **Referral pathway tracking** (Ward → police → MLEF vs. police station → MLEF vs. AG office referral) | No tracking of how the patient was referred to forensic medicine |
+| 10 | **Legal authorization document storage** (MLEF scans, request letters, court orders) | No upload/scan mechanism for incoming authorization documents |
+| 11 | **Investigations/Referrals/Reviews management** (X-ray/CT requests, blood/urine toxicology, swabs, psychiatry/paediatrics/gynobs referrals) | `test_requests` table exists but no UI. `consultation_referrals` table exists but **NO route** at all. No way to create, track, or manage investigation requests through the UI. |
+| 12 | **MLEF Register** (searchable register of all MLEFs) | No dedicated MLEF register view. The clinical list shows raw case data, not MLEF-centric data. |
+| 13 | **Police copy of MLEF generation** | No report generation for police copies |
+| 14 | **Consent scan upload** (MLEF consent form scans) | `consent_scans` directory configured but no upload route exists |
+
+---
+
+## 2. Autopsy Component
+
+### ✅ Implemented
+| # | Feature | Status | Where |
+|---|---------|--------|-------|
+| 1 | Register autopsy case with cadaver details | ✅ Done | [autopsy.py](file:///d:/4th%20sem/database/New%20project/app/routes/autopsy.py) |
+| 2 | Inquest order tracking (ordered by, order number) | ✅ Done | Form has fields |
+| 3 | PMR draft auto-created on registration | ✅ Done | [sp_register_autopsy_case](file:///d:/4th%20sem/database/New%20project/database/procedures.sql#L68-L118) |
+
+### ⚠️ Partially Implemented (Schema exists but NO UI)
+| # | Feature | Gap Detail |
+|---|---------|------------|
+| 4 | **Death certificate / Cause of death form** | DB table `death_certificates` exists with encrypted fields for immediate/antecedent/contributory causes + maternal death flag, but **NO page** to fill it in |
+| 5 | **PMR document management** (draft status tracking) | DB table `pmr_drafts` exists with document_url and status, but **NO UI** to upload/edit PMR documents |
+| 6 | **Voice dictation records** | DB table `voice_dictations` exists for audio → text transcripts, but **NO upload or playback UI** |
+
+### ❌ Completely Missing
+| # | Feature | Impact |
+|---|---------|--------|
+| 7 | **Death type classification** (Natural, Accidental, Suicidal, Homicidal) | No field in DB or form to classify manner of death |
+| 8 | **Pre-autopsy information gathering UI** (family/witness statements, BHT records, police statements) | No way to record or attach pre-autopsy documents |
+| 9 | **Autopsy procedure recording** (findings during autopsy) | No route or form for recording actual autopsy findings |
+| 10 | **Crime scene information** | No link to crime scene details or photographs |
+| 11 | **PM Registry** (searchable postmortem register) | No dedicated PM register view |
+| 12 | **Audio-to-text PMR recording** | `voice_dictations` table exists but no recording/transcription capability |
+| 13 | **Digital histology repository** | No histology-specific storage or viewing |
+| 14 | **Scanned PMR storage** (in separate folders per case) | No per-case folder structure or PMR scanning capability |
+| 15 | **Autopsy date tracking** | Field exists in schema (`autopsy_date`) but is **NOT in the registration form** |
+
+---
+
+## 3. Shared / Cross-Cutting Features
+
+### ✅ Implemented
+| # | Feature | Status | Where |
+|---|---------|--------|-------|
+| 1 | **Notification system** (user alerts) | ✅ Done | Bell icon with dropdown, alerts table, dismiss functionality |
+| 2 | **Role-based access control** | ✅ Done | `@roles_allowed` decorator, 5 roles seeded |
+
+### ⚠️ Partially Implemented
+| # | Feature | Gap Detail |
+|---|---------|------------|
+| 3 | **Photograph management** | `digital_assets` table exists with asset_type field, but **NO upload UI** for case photographs (clinical or autopsy) |
+| 4 | **Court submissions & receipts** | Court dispatch list and receipt upload work, but **NO way to create a new court submission** through the UI |
+
+### ❌ Completely Missing
+| # | Feature | Impact |
+|---|---------|--------|
+| 5 | **Auto-generate reports using templates** | No report template system. Dr. specifically requested auto-generation of MLR and PMR using templates. |
+| 6 | **Per-doctor case filtering** ("Separated for each doctor working at the department") | All cases shown globally. No filter by `assigned_doctor_id` or "My Cases" view. |
+| 7 | **MLEF/PMR tracing** (track where a physical document is) | No document tracking beyond digital status |
+| 8 | **Research-level access** (different access levels for research vs clinical use) | Only basic role-based access; no granular permission for research queries |
+
+---
+
+## 4. What the Database Schema Supports but the App Doesn't Expose
+
+These tables exist in [schema.sql](file:///d:/4th%20sem/database/New%20project/database/schema.sql) but have **zero routes or UI pages**:
+
+| Table | Purpose | Lines |
+|-------|---------|-------|
+| `mlef_records` | Full MLEF data entry (injuries, consent, hurt category) | Has 13+ fields, none editable via UI |
+| `mlr_documents` | MLR report status tracking | No view/edit page |
+| `clinical_observations` | Encrypted clinical findings | No CRUD |
+| `pmr_drafts` | PMR document uploads & status | No view/edit page |
+| `death_certificates` | Cause of death form | No CRUD |
+| `voice_dictations` | Audio transcripts for autopsy | No CRUD |
+| `wound_charts` | Wound documentation (type, weapon, location) | No CRUD |
+| `test_requests` | Investigation requests (X-ray, blood, etc.) | No create/list page |
+| `test_results` | Lab result uploads | Only upload route, no list/view |
+| `consultation_referrals` | Specialist referrals | No CRUD at all |
+| `peer_reviews` | Case peer reviews | No CRUD |
+| `digital_assets` | Photographs & digital evidence | No upload/gallery UI |
+| `asset_revisions` | Version control for digital assets | No CRUD |
+
+> [!IMPORTANT]
+> This means **13 out of 28 database tables** (~46%) have been designed correctly but are completely inaccessible through the web application. The database architecture is solid — the gap is in the application layer.
+
+---
+
+## 5. Prioritized Recommendations
+
+### 🔴 Priority 1 — Critical (Core Workflow Gaps)
+These are the features that prevent the system from being used for its primary purpose:
+
+1. **MLEF Data Entry Page** — Create a full form to edit `mlef_records` (injury details, consent, wound types, category of hurt, alcohol status)
+2. **Clinical Case Detail View** — A page showing all data for a single case (patient info, MLEF, observations, investigations, referrals, report status)
+3. **Autopsy Case Detail View** — Same as above for autopsy (cadaver info, PMR, death certificate, voice dictations)
+4. **Cause of Death Form Page** — A form to fill in `death_certificates` (immediate/antecedent/contributory causes)
+5. **Wound Chart Entry** — A form for `wound_charts` (wound type, weapon, anatomical location)
+
+### 🟡 Priority 2 — Important (Document Management)
+6. **Investigation Request Management** — Create/track test requests (X-ray, blood, toxicology, swabs) and view results
+7. **Consultation Referral Management** — Create and track specialist referrals
+8. **Photograph Upload & Gallery** — Upload and view case photographs
+9. **MLR/PMR Status Tracking Pages** — View and update report statuses through their lifecycle
+10. **Per-Doctor "My Cases" Filter** — Filter all views by assigned doctor
+
+### 🟢 Priority 3 — Nice-to-Have (Advanced Features)
+11. **Auto-Generate Reports** — Template-based MLR/PMR generation
+12. **MLEF & PM Registers** — Searchable register views
+13. **Case Type Classification** — Add fields for clinical case categories
+14. **Death Type Classification** — Add manner-of-death field for autopsy
+15. **Digital Histology Repository** — Specialized histology image storage
+16. **Voice Dictation Recording** — Audio upload and transcript management
+
+---
+
+## Architecture Assessment
+
+| Aspect | Rating | Notes |
+|--------|:------:|-------|
+| Database Schema | ⭐⭐⭐⭐⭐ | Excellent. 28 tables cover nearly all requirements |
+| Stored Procedures | ⭐⭐⭐⭐ | Good. 6 procedures handle key transactions |
+| Triggers | ⭐⭐⭐⭐⭐ | Excellent. Temporal validation, chain of custody, audit trails, immutability |
+| Backend Routes | ⭐⭐ | Weak. Only 5 route files covering basic CRUD |
+| Frontend Templates | ⭐⭐ | Weak. Only registration forms and list views; no detail/edit pages |
+| Role-Based Access | ⭐⭐⭐ | Adequate. Roles exist but granular permissions not enforced |
+| Notification System | ⭐⭐⭐⭐ | Good. Working alerts with dismiss functionality |
+| Report Generation | ⭐ | Almost non-existent. Only basic daily/pending list views |
+
+> [!TIP]
+> **The good news**: Your database layer is production-quality. The 28-table schema, 6 stored procedures, and 8 triggers provide a very solid foundation. The majority of the work needed is building **UI pages and routes** that expose the data already structured in the database. This is significantly easier than redesigning the schema.

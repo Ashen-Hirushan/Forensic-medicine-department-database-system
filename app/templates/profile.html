@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="two-col-grid">
+    <!-- Profile Info Card -->
+    <div class="card">
+        <h3 class="card-title">User Information</h3>
+        <div style="display: flex; gap: var(--space-6); align-items: flex-start; margin-bottom: var(--space-5);">
+            <div>
+                {% if user_info.profile_picture and user_info.profile_picture != 'default.png' %}
+                    <img src="{{ url_for('static', filename='uploads/profiles/' + user_info.profile_picture) }}" alt="Profile Picture" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color);">
+                {% else %}
+                    <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--bg-main); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--text-muted);">
+                        👤
+                    </div>
+                {% endif %}
+            </div>
+            <div style="flex-grow: 1;">
+                <form action="/profile/picture" method="POST" enctype="multipart/form-data">
+                    <div class="form-group" style="margin-bottom: var(--space-2);">
+                        <label class="form-label" style="font-size: var(--font-size-sm);">Update Profile Picture</label>
+                        <input type="file" name="profile_pic" class="form-control" accept="image/*" required style="padding: var(--space-1);">
+                    </div>
+                    <button type="submit" class="btn btn-secondary btn-sm">Upload Picture</button>
+                </form>
+            </div>
+        </div>
+
+        <div style="margin-bottom: var(--space-4);">
+            <div style="font-size: var(--font-size-sm); color: var(--text-secondary);">Username</div>
+            <div style="font-size: var(--font-size-lg); font-weight: 500;">{{ user_info.username }}</div>
+        </div>
+        <div style="margin-bottom: var(--space-4);">
+            <div style="font-size: var(--font-size-sm); color: var(--text-secondary);">System Role</div>
+            <div><span class="badge badge-info">{{ user_info.role_name }}</span></div>
+        </div>
+        
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: var(--space-4) 0;">
+        
+        <h3 class="card-title" style="font-size: var(--font-size-base); margin-bottom: var(--space-3);">Staff Directory Details</h3>
+        {% if user_info.full_name %}
+            <div style="margin-bottom: var(--space-3);">
+                <div style="font-size: var(--font-size-sm); color: var(--text-secondary);">Full Name</div>
+                <div>{{ user_info.full_name }}</div>
+            </div>
+            <div style="margin-bottom: var(--space-3);">
+                <div style="font-size: var(--font-size-sm); color: var(--text-secondary);">Designation</div>
+                <div>{{ user_info.designation or 'Not specified' }}</div>
+            </div>
+        {% else %}
+            <p style="color: var(--text-muted); font-size: var(--font-size-sm);">Your account is not linked to a staff directory profile.</p>
+        {% endif %}
+    </div>
+
+    <!-- Change Password Card -->
+    <div class="card">
+        <h3 class="card-title">Change Password</h3>
+        <form action="/profile" method="POST">
+            <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" name="current_password" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">New Password</label>
+                <input type="password" name="new_password" class="form-control" required minlength="6">
+            </div>
+            <button type="submit" class="btn btn-primary">Update Password</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

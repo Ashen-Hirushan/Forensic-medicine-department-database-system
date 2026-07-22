@@ -3,35 +3,64 @@
 {% block page_title %}Autopsy Cases{% endblock %}
 
 {% block content %}
-<div class="glass-card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 class="card-title" style="margin: 0;">Recent Postmortem Investigations</h3>
-        <a href="/autopsy/new" class="btn btn-primary">+ Register New Autopsy</a>
+<div class="card">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 600;">🔬 Postmortem Investigations</h2>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <form method="GET" style="display: flex; gap: 8px; align-items: center;">
+                <select name="doctor_id" class="form-control" style="padding: 5px 10px; font-size: 13px; min-width: 180px;" onchange="this.form.submit()">
+                    <option value="">All Doctors</option>
+                    {% for doc in doctors %}
+                    <option value="{{ doc.doctor_id }}" {{ 'selected' if doctor_filter == doc.doctor_id|string }}>{{ doc.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+            <a href="/autopsy/new" class="btn btn-primary btn-sm">+ Register New Case</a>
+        </div>
     </div>
-    
+
     <div class="table-container">
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Case ID</th>
                     <th>PM Serial No</th>
-                    <th>Death Datetime</th>
+                    <th>Cadaver Name</th>
+                    <th>Age/Gender</th>
+                    <th>Manner of Death</th>
                     <th>Autopsy Date</th>
-                    <th>Inquest Ordered By</th>
+                    <th>PMR Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for case in cases %}
                 <tr>
-                    <td>{{ case.case_id }}</td>
-                    <td>{{ case.pm_serial_no or 'N/A' }}</td>
-                    <td>{{ case.death_datetime or 'N/A' }}</td>
-                    <td>{{ case.autopsy_date or 'N/A' }}</td>
-                    <td>{{ case.inquest_ordered_by or 'N/A' }}</td>
+                    <td><a href="/autopsy/{{ case.case_id }}" style="color: #2563eb; font-weight: 600; text-decoration: none;">{{ case.pm_serial_no or '—' }}</a></td>
+                    <td style="font-weight: 500;">{{ case.cadaver_name or 'Unidentified' }}</td>
+                    <td>~{{ case.estimated_age or '—' }} / {{ case.gender or '—' }}</td>
+                    <td>{{ case.manner_of_death or '—' }}</td>
+                    <td>{{ case.autopsy_date.strftime('%b %d, %Y') if case.autopsy_date else '—' }}</td>
+                    <td>
+                        {% set status = case.draft_status %}
+                        {% if status == 'Pending Exam' %}
+                            <span class="badge badge-warning">{{ status }}</span>
+                        {% elif status == 'PMR/MLEF Drafted' %}
+                            <span class="badge badge-info">Drafted</span>
+                        {% elif status == 'Dispatched' %}
+                            <span class="badge badge-success">Dispatched</span>
+                        {% elif status == 'Received by Court' %}
+                            <span class="badge badge-success">Received</span>
+                        {% else %}
+                            <span class="badge badge-warning">{{ status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/autopsy/{{ case.case_id }}" class="btn btn-secondary btn-sm">View</a>
+                    </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="5" style="text-align: center; color: var(--text-muted);">No autopsy cases found.</td>
+                    <td colspan="7" class="empty-state">No autopsy cases found.</td>
                 </tr>
                 {% endfor %}
             </tbody>

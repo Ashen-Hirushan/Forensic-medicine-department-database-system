@@ -123,7 +123,7 @@ def seed_database():
             # 11. Seed mlef_records
             mlef_data = [
                 (1, 1, 'MLEF-1001', True, 'Patient involved in RTA. Laceration on left thigh.', False, True, True, False, False, False, 'Non-grievous', False, 'PC 54321 Bandara'),
-                (2, 2, True, 'MLEF-1002', True, 'Assault victim. Multiple contusions.', False, True, False, False, False, False, 'Non-grievous', False, 'Sgt 12345 Silva')
+                (2, 2, 'MLEF-1002', True, 'Assault victim. Multiple contusions.', False, True, False, False, False, False, 'Non-grievous', False, 'Sgt 12345 Silva')
             ]
             cursor.executemany("INSERT INTO mlef_records (mlef_id, clinical_case_id, mlef_number, consent_obtained, injury_details, has_abrasion, has_contusion, has_laceration, has_stab, has_fracture, has_burn, category_of_hurt, under_influence_of_alcohol, accompanying_officer_info) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", mlef_data)
 

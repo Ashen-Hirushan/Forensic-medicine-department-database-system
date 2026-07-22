@@ -1,32 +1,271 @@
 {% extends 'base.html' %}
 
-{% block page_title %}Overview Dashboard{% endblock %}
+{% block page_title %}
+<div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+    <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="18" rx="1"></rect>
+                <rect x="14" y="3" width="7" height="8" rx="1"></rect>
+                <rect x="14" y="15" width="7" height="6" rx="1"></rect>
+            </svg>
+            <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">Dashboard</h1>
+        </div>
+        <div style="color: #6b7280; font-size: 14px; margin-top: 4px; font-weight: normal;">Welcome back, {{ session.get('role_name', 'User') }}! Here's your department overview.</div>
+    </div>
+    <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 6px 12px; font-size: 14px; font-weight: 500; color: #374151; display: flex; align-items: center; gap: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+        📅 {{ current_date }}
+    </div>
+</div>
+{% endblock %}
 
 {% block content %}
-<div class="dashboard-grid">
-    <div class="glass-card">
-        <h3 class="card-title">Monthly Clinical Cases</h3>
-        <div style="height: 250px;">
-            <canvas id="clinicalChart"></canvas>
+<style>
+    /* Add specific styles for the new dashboard layout */
+    .dashboard-header-block {
+        /* handled inline in block page_title */
+    }
+    .new-stat-card {
+        background: #fff;
+        border: 1px solid #f3f4f6;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        display: flex;
+        flex-direction: column;
+    }
+    .stat-top {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    .stat-icon-wrapper {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+    .icon-blue { background: #eff6ff; color: #3b82f6; }
+    .icon-green { background: #f0fdf4; color: #22c55e; }
+    .icon-cyan { background: #ecfeff; color: #06b6d4; }
+    .icon-orange { background: #fff7ed; color: #f97316; }
+    
+    .stat-numbers {
+        display: flex;
+        flex-direction: column;
+    }
+    .stat-value-new {
+        font-size: 28px;
+        font-weight: 700;
+        color: #111827;
+        line-height: 1.1;
+    }
+    .stat-label-new {
+        font-size: 13px;
+        color: #6b7280;
+        font-weight: 500;
+    }
+    .stat-footer {
+        padding-top: 12px;
+        border-top: 1px solid #f3f4f6;
+        font-size: 12px;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .recent-cases-table th {
+        background: #f9fafb;
+        color: #6b7280;
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 12px 16px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+    }
+    .recent-cases-table td {
+        padding: 16px;
+        border-bottom: 1px solid #e5e7eb;
+        color: #374151;
+        font-size: 14px;
+    }
+    .recent-cases-table tr:last-child td {
+        border-bottom: none;
+    }
+    .case-link {
+        color: #2563eb;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .case-link:hover { text-decoration: underline; }
+    
+    .badge-custom {
+        padding: 4px 10px;
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .badge-type-clinical { background: #e0e7ff; color: #3730a3; }
+    .badge-type-autopsy { background: #ffe4e6; color: #9f1239; }
+    
+    .badge-status-open { background: #dcfce7; color: #166534; }
+    .badge-status-submitted { background: #d1fae5; color: #065f46; }
+    .badge-status-investigation { background: #fef3c7; color: #92400e; }
+    
+    .badge-priority-normal { background: #6b7280; color: #ffffff; }
+    .badge-priority-urgent { background: #fbbf24; color: #111827; }
+
+    /* Fix navbar left area for long title */
+    .nav-left { flex-grow: 1; }
+</style>
+
+<!-- Stats Summary Row -->
+<div class="stats-row" style="margin-top: -10px; margin-bottom: 24px;">
+    <!-- Total Cases -->
+    <div class="new-stat-card">
+        <div class="stat-top">
+            <div class="stat-icon-wrapper icon-blue">📁</div>
+            <div class="stat-numbers">
+                <span class="stat-value-new">{{ total_cases }}</span>
+                <span class="stat-label-new">Total Cases</span>
+            </div>
+        </div>
+        <div class="stat-footer">
+            <span>⏱️</span> {{ total_clinical }} Clinical, {{ total_autopsies }} Autopsy
         </div>
     </div>
-    
-    <div class="glass-card">
-        <h3 class="card-title">Monthly Autopsy Cases</h3>
-        <div style="height: 250px;">
-            <canvas id="autopsyChart"></canvas>
+
+    <!-- Active Cases -->
+    <div class="new-stat-card">
+        <div class="stat-top">
+            <div class="stat-icon-wrapper icon-green">📈</div>
+            <div class="stat-numbers">
+                <span class="stat-value-new">{{ active_cases }}</span>
+                <span class="stat-label-new">Active Cases</span>
+            </div>
+        </div>
+        <div class="stat-footer">
+            <span>🕒</span> Cases not yet closed
         </div>
     </div>
-    
-    <div class="glass-card">
-        <h3 class="card-title">Pending Court Reports</h3>
-        <div style="font-size: 3.5rem; font-weight: 700; color: var(--warning-color); text-align: center; margin-top: 50px;">
-            {% if stats and stats|length >= 3 and stats[2]|length > 0 %}
-                {{ stats[2][0]['pending_court_reports'] }}
-            {% else %}
-                0
-            {% endif %}
+
+    <!-- Total Patients -->
+    <div class="new-stat-card">
+        <div class="stat-top">
+            <div class="stat-icon-wrapper icon-cyan">👥</div>
+            <div class="stat-numbers">
+                <span class="stat-value-new">{{ total_patients }}</span>
+                <span class="stat-label-new">Total Patients</span>
+            </div>
         </div>
+        <div class="stat-footer">
+            <span>👤</span> Registered in system
+        </div>
+    </div>
+
+    <!-- Pending Reports -->
+    <div class="new-stat-card">
+        <div class="stat-top">
+            <div class="stat-icon-wrapper icon-orange">⚠️</div>
+            <div class="stat-numbers">
+                <span class="stat-value-new">{{ pending_reports }}</span>
+                <span class="stat-label-new">Pending Reports</span>
+            </div>
+        </div>
+        <div class="stat-footer">
+            <span>📄</span> Drafts & under review
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="two-col-grid" style="margin-bottom: 24px;">
+    <div class="card" style="border-radius: 12px; display: flex; flex-direction: column;">
+        <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
+            <span>◴</span> Cases by Type
+        </h3>
+        <div style="height: 280px; position: relative; flex-grow: 1; display: flex; align-items: center; justify-content: center;">
+            <canvas id="typeChart"></canvas>
+        </div>
+    </div>
+
+    <div class="card" style="border-radius: 12px; display: flex; flex-direction: column;">
+        <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
+            <span>📈</span> Monthly Case Trend
+        </h3>
+        <div style="height: 280px; position: relative; flex-grow: 1;">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Cases Table -->
+<div class="card" style="border-radius: 12px; padding: 0; overflow: hidden; margin-bottom: 40px;">
+    <div style="padding: 20px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #fff;">
+        <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #111827; display: flex; align-items: center; gap: 8px;">
+            <span>🕒</span> Recent Cases
+        </h3>
+        <a href="#" class="btn btn-secondary btn-sm" style="color: #2563eb; border-color: #bfdbfe;">View All</a>
+    </div>
+    <div style="overflow-x: auto; background: #fff;">
+        <table style="width: 100%; border-collapse: collapse;" class="recent-cases-table">
+            <thead>
+                <tr>
+                    <th>CASE #</th>
+                    <th>PATIENT</th>
+                    <th>TYPE</th>
+                    <th>STATUS</th>
+                    <th>PRIORITY</th>
+                    <th>DATE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for case in recent_cases %}
+                <tr>
+                    <td><a href="#" class="case-link">{{ case.case_no }}</a></td>
+                    <td style="font-weight: 500;">{{ case.patient_name }}</td>
+                    <td>
+                        {% if case.type == 'Clinical' %}
+                        <span class="badge-custom badge-type-clinical">💙 Clinical</span>
+                        {% else %}
+                        <span class="badge-custom badge-type-autopsy">🩸 Autopsy</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if case.status == 'Received by Court' %}
+                            <span class="badge-custom badge-status-submitted">Report Submitted</span>
+                        {% elif case.status == 'Under Investigation' %}
+                            <span class="badge-custom badge-status-investigation">Under Investigation</span>
+                        {% else %}
+                            <span class="badge-custom badge-status-open">Open</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if case.priority == 'Urgent' %}
+                            <span class="badge-custom badge-priority-urgent">Urgent</span>
+                        {% else %}
+                            <span class="badge-custom badge-priority-normal">Normal</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: #6b7280;">{{ case.date.strftime('%b %d, %Y') if case.date else 'N/A' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #9ca3af; font-style: italic;">No recent cases found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}
@@ -35,17 +274,11 @@
 <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Extract data passed from backend (stats from sp_get_monthly_statistics)
-        {% if stats and stats|length >= 2 %}
-            const clinicalCount = {{ stats[0][0]['total_clinical'] if stats[0]|length > 0 else 0 }};
-            const autopsyCount = {{ stats[1][0]['total_autopsies'] if stats[1]|length > 0 else 0 }};
-        {% else %}
-            const clinicalCount = 0;
-            const autopsyCount = 0;
-        {% endif %}
-        
-        initDashboardChart('clinicalChart', ['This Month'], [clinicalCount], 'Clinical Cases');
-        initDashboardChart('autopsyChart', ['This Month'], [autopsyCount], 'Autopsy Cases');
+        let clinicalCount = {{ total_clinical }};
+        let autopsyCount = {{ total_autopsies }};
+
+        initDoughnutChart('typeChart', clinicalCount, autopsyCount);
+        initTrendChart('trendChart');
     });
 </script>
 {% endblock %}

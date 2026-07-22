@@ -3,49 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Forensic Medical Department Database Management System">
     <title>{% block title %}Forensic Dept System{% endblock %}</title>
-    
-    <!-- CSS Assets -->
+
+    <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
-    
+
     <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+
     {% block extra_head %}{% endblock %}
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar Component -->
         {% include 'components/sidebar.html' %}
-        
+
         <div class="main-wrapper">
-            <!-- Navbar Component -->
             {% include 'components/navbar.html' %}
-            
-            <!-- Main Content Area -->
+
             <main class="content-area">
-                <!-- Flash Messages Area -->
-                <div class="alert-container">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="alert-container">
                             {% for category, message in messages %}
                                 <div class="alert alert-{{ category }}">
                                     <span>{{ message }}</span>
                                 </div>
                             {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-                </div>
+                        </div>
+                    {% endif %}
+                {% endwith %}
 
-                {% block content %}
-                {% endblock %}
+                {% block content %}{% endblock %}
             </main>
         </div>
     </div>
 
-    <!-- JS Assets -->
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>

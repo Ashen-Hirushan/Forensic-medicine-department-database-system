@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Edit MLEF — {{ case.reference_no }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 860px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="font-size: 20px; font-weight: 700; margin: 0;">📄 MLEF Data Entry</h2>
+        <a href="/clinical/{{ case_id }}" class="btn btn-secondary btn-sm">← Back to Case</a>
+    </div>
+
+    <form action="/clinical/{{ case_id }}/mlef" method="POST">
+        <!-- MLEF Number & Consent -->
+        <div class="form-section">
+            <div class="form-section-title">General Information</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">MLEF Number</label>
+                    <input type="text" name="mlef_number" class="form-control" 
+                           value="{{ mlef.mlef_number or '' }}" placeholder="e.g. MLEF/2026/001">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category of Hurt</label>
+                    <select name="category_of_hurt" class="form-control">
+                        <option value="">— Select —</option>
+                        <option value="Non-grievous" {{ 'selected' if mlef and mlef.category_of_hurt == 'Non-grievous' }}>Non-grievous</option>
+                        <option value="Grievous" {{ 'selected' if mlef and mlef.category_of_hurt == 'Grievous' }}>Grievous</option>
+                        <option value="Fatal in ordinary course" {{ 'selected' if mlef and mlef.category_of_hurt == 'Fatal in ordinary course' }}>Fatal in ordinary course</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" name="consent_obtained" value="1" 
+                               {{ 'checked' if mlef and mlef.consent_obtained }} style="width: auto;">
+                        Consent Obtained from Patient
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" name="under_influence_of_alcohol" value="1" 
+                               {{ 'checked' if mlef and mlef.under_influence_of_alcohol }} style="width: auto;">
+                        Under Influence of Alcohol
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Injury Details -->
+        <div class="form-section">
+            <div class="form-section-title">Injury Details</div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label class="form-label">Detailed Description of Injuries</label>
+                    <textarea name="injury_details" class="form-control" rows="5" 
+                              placeholder="Describe all injuries observed during examination...">{{ mlef.injury_details or '' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Injury Type Checkboxes -->
+        <div class="form-section">
+            <div class="form-section-title">Injury Types Present</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_abrasion" value="1" {{ 'checked' if mlef and mlef.has_abrasion }} style="width: auto;">
+                    Abrasion
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_contusion" value="1" {{ 'checked' if mlef and mlef.has_contusion }} style="width: auto;">
+                    Contusion
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_laceration" value="1" {{ 'checked' if mlef and mlef.has_laceration }} style="width: auto;">
+                    Laceration
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_stab" value="1" {{ 'checked' if mlef and mlef.has_stab }} style="width: auto;">
+                    Stab Wound
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_fracture" value="1" {{ 'checked' if mlef and mlef.has_fracture }} style="width: auto;">
+                    Fracture
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_burn" value="1" {{ 'checked' if mlef and mlef.has_burn }} style="width: auto;">
+                    Burn
+                </label>
+            </div>
+        </div>
+
+        <!-- Accompanying Officer -->
+        <div class="form-section">
+            <div class="form-section-title">Accompanying Officer</div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label class="form-label">Officer Information</label>
+                    <textarea name="accompanying_officer_info" class="form-control" rows="3" 
+                              placeholder="Name, rank, station, badge number of accompanying officer...">{{ mlef.accompanying_officer_info or '' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="/clinical/{{ case_id }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">💾 Save MLEF</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

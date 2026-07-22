@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Cause of Death — {{ case.pm_serial_no }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 860px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="font-size: 20px; font-weight: 700; margin: 0;">💀 Cause of Death Form</h2>
+        <a href="/autopsy/{{ case_id }}" class="btn btn-secondary btn-sm">← Back to Case</a>
+    </div>
+
+    <form action="/autopsy/{{ case_id }}/cod" method="POST">
+        <div class="form-section">
+            <div class="form-section-title">WHO International Form of Medical Certificate of Cause of Death</div>
+            
+            <div class="form-group">
+                <label class="form-label">I (a) — Immediate Cause of Death</label>
+                <textarea name="immediate_cause" class="form-control" rows="2" 
+                          placeholder="Disease or condition directly leading to death...">{{ cod.immediate_cause_encrypted if cod else '' }}</textarea>
+                <div class="form-hint">The disease, injury, or complication that directly caused death</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">I (b) — Antecedent Cause</label>
+                <textarea name="antecedent_cause" class="form-control" rows="2" 
+                          placeholder="Due to (or as a consequence of)...">{{ cod.antecedent_cause_encrypted if cod else '' }}</textarea>
+                <div class="form-hint">Morbid conditions, if any, giving rise to the immediate cause (a)</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">II — Contributory Cause</label>
+                <textarea name="contributory_cause" class="form-control" rows="2" 
+                          placeholder="Other significant conditions contributing to death...">{{ cod.contributory_cause_encrypted if cod else '' }}</textarea>
+                <div class="form-hint">Other significant conditions contributing to death but not related to the cause in I</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-section-title">Additional Information</div>
+            <div class="form-group">
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" name="is_maternal_death" value="1" 
+                           {{ 'checked' if cod and cod.is_maternal_death }} style="width: auto;">
+                    This is a Maternal Death (during pregnancy or within 42 days of termination)
+                </label>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="/autopsy/{{ case_id }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">💾 Save Cause of Death</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

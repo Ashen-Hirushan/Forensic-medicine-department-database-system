@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Case {{ case.reference_no }}{% endblock %}
+
+{% block content %}
+<style>
+    .detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+    .detail-header h2 { font-size: 20px; font-weight: 700; color: #111827; margin: 0; }
+    .detail-header .sub { font-size: 13px; color: #6b7280; margin-top: 4px; }
+    
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 24px; overflow-x: auto; }
+    .tab-btn { padding: 10px 18px; font-size: 13px; font-weight: 600; color: #6b7280; background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; white-space: nowrap; }
+    .tab-btn:hover { color: #374151; }
+    .tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .info-item label { font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+    .info-item .val { font-size: 15px; color: #111827; font-weight: 500; margin-top: 2px; }
+    
+    .section-title { font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
+    
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .mini-table th { background: #f9fafb; padding: 8px 12px; text-align: left; font-weight: 600; color: #6b7280; text-transform: uppercase; font-size: 11px; letter-spacing: 0.04em; border-bottom: 1px solid #e5e7eb; }
+    .mini-table td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; color: #374151; }
+    .mini-table tr:last-child td { border-bottom: none; }
+    
+    .inline-form { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid #f3f4f6; }
+    .inline-form .form-group { margin-bottom: 0; flex: 1; min-width: 150px; }
+    .inline-form .form-label { font-size: 12px; margin-bottom: 4px; }
+    .inline-form .form-control { padding: 6px 10px; font-size: 13px; }
+    
+    .badge-sm { padding: 3px 8px; border-radius: 100px; font-size: 11px; font-weight: 600; }
+    .badge-pending { background: #fef3c7; color: #92400e; }
+    .badge-drafted { background: #dbeafe; color: #1e40af; }
+    .badge-dispatched { background: #d1fae5; color: #065f46; }
+    .badge-received { background: #dcfce7; color: #166534; }
+    
+    .wound-tag { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; margin: 2px; }
+    .wound-yes { background: #fee2e2; color: #991b1b; }
+    .wound-no { background: #f3f4f6; color: #9ca3af; }
+    
+    .empty-msg { text-align: center; padding: 30px; color: #9ca3af; font-style: italic; font-size: 14px; }
+</style>
+
+<!-- Header -->
+<div class="detail-header">
+    <div>
+        <h2>🩺 Clinical Case: {{ case.reference_no }}</h2>
+        <div class="sub">Patient: {{ case.patient_name }} &bull; {{ case.gender or '—' }}, {{ case.age or '—' }} yrs &bull; Admitted: {{ case.admission_date.strftime('%b %d, %Y') if case.admission_date else '—' }}</div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+        <a href="/clinical/{{ case.case_id }}/mlef" class="btn btn-primary btn-sm">📝 Edit MLEF</a>
+        <a href="/clinical/{{ case.case_id }}/mlr" class="btn btn-primary btn-sm" style="background: #0369a1; border-color: #0369a1;">📄 MLR Report</a>
+        <a href="/clinical" class="btn btn-secondary btn-sm">← Back to List</a>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(event, 'overview')">Overview</button>
+    <button class="tab-btn" onclick="switchTab(event, 'mlef')">MLEF Record</button>
+    <button class="tab-btn" onclick="switchTab(event, 'observations')">Observations</button>
+    <button class="tab-btn" onclick="switchTab(event, 'wounds')">Wound Charts</button>
+    <button class="tab-btn" onclick="switchTab(event, 'investigations')">Investigations</button>
+    <button class="tab-btn" onclick="switchTab(event, 'referrals')">Referrals</button>
+    <button class="tab-btn" onclick="switchTab(event, 'photos')">Photos</button>
+    <button class="tab-btn" onclick="switchTab(event, 'court')">Court & Reports</button>
+</div>
+
+<!-- ===================== TAB: OVERVIEW ===================== -->
+<div id="overview" class="tab-panel active">
+    <div class="card">
+        <div class="section-title">📋 Case Information</div>
+        <div class="info-grid">
+            <div class="info-item"><label>Reference No</label><div class="val">{{ case.reference_no or '—' }}</div></div>
+            <div class="info-item"><label>Hospital BHT</label><div class="val">{{ case.hospital_bht_no or '—' }}</div></div>
+            <div class="info-item"><label>Healthcare Facility</label><div class="val">{{ case.facility_name or '—' }}</div></div>
+            <div class="info-item"><label>Police Station</label><div class="val">{{ case.station_name or '—' }}</div></div>
+            <div class="info-item"><label>Assigned Doctor</label><div class="val">{{ case.doctor_name or '—' }}</div></div>
+            <div class="info-item"><label>Case Category</label><div class="val">{{ case.case_category or '—' }}</div></div>
+            <div class="info-item"><label>Referral Source</label><div class="val">{{ case.referral_source or '—' }}</div></div>
+            <div class="info-item"><label>Incident Date</label><div class="val">{{ case.incident_date.strftime('%b %d, %Y %H:%M') if case.incident_date else '—' }}</div></div>
+            <div class="info-item"><label>Admission Date</label><div class="val">{{ case.admission_date.strftime('%b %d, %Y %H:%M') if case.admission_date else '—' }}</div></div>
+            <div class="info-item"><label>Examination Date</label><div class="val">{{ case.examination_date.strftime('%b %d, %Y %H:%M') if case.examination_date else '—' }}</div></div>
+        </div>
+        
+        <div class="section-title" style="margin-top: 24px;">👤 Patient Demographics</div>
+        <div class="info-grid">
+            <div class="info-item"><label>Full Name</label><div class="val">{{ case.patient_name }}</div></div>
+            <div class="info-item"><label>NIC</label><div class="val">{{ case.patient_nic or '—' }}</div></div>
+            <div class="info-item"><label>Age</label><div class="val">{{ case.age or '—' }}</div></div>
+            <div class="info-item"><label>Gender</label><div class="val">{{ case.gender or '—' }}</div></div>
+            <div class="info-item"><label>Address</label><div class="val">{{ case.permanent_address or '—' }}</div></div>
+            <div class="info-item"><label>Contact</label><div class="val">{{ case.contact_no or '—' }}</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== TAB: MLEF ===================== -->
+<div id="mlef" class="tab-panel">
+    <div class="card">
+        <div class="section-title">📄 Medico-Legal Examination Form (MLEF)</div>
+        {% if mlef %}
+        <div class="info-grid">
+            <div class="info-item"><label>MLEF Number</label><div class="val">{{ mlef.mlef_number or 'Not assigned' }}</div></div>
+            <div class="info-item"><label>Consent Obtained</label><div class="val">{{ '✅ Yes' if mlef.consent_obtained else '❌ No' }}</div></div>
+            <div class="info-item"><label>Category of Hurt</label><div class="val">{{ mlef.category_of_hurt or '—' }}</div></div>
+            <div class="info-item"><label>Under Influence of Alcohol</label><div class="val">{{ '✅ Yes' if mlef.under_influence_of_alcohol else '❌ No' }}</div></div>
+        </div>
+        
+        <div style="margin-top: 16px;">
+            <label style="font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Injury Details</label>
+            <div style="margin-top: 4px; padding: 12px; background: #f9fafb; border-radius: 8px; font-size: 14px; color: #374151; line-height: 1.6;">
+                {{ mlef.injury_details or 'No details recorded.' }}
+            </div>
+        </div>
+        
+        <div style="margin-top: 16px;">
+            <label style="font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Injury Types Present</label>
+            <div style="margin-top: 6px;">
+                <span class="wound-tag {{ 'wound-yes' if mlef.has_abrasion else 'wound-no' }}">Abrasion</span>
+                <span class="wound-tag {{ 'wound-yes' if mlef.has_contusion else 'wound-no' }}">Contusion</span>
+                <span class="wound-tag {{ 'wound-yes' if mlef.has_laceration else 'wound-no' }}">Laceration</span>
+                <span class="wound-tag {{ 'wound-yes' if mlef.has_stab else 'wound-no' }}">Stab Wound</span>
+                <span class="wound-tag {{ 'wound-yes' if mlef.has_fracture else 'wound-no' }}">Fracture</span>
+                <span class="wound-tag {{ 'wound-yes' if mlef.has_burn else 'wound-no' }}">Burn</span>
+            </div>
+        </div>
+        
+        <div style="margin-top: 16px;">
+            <label style="font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Accompanying Officer Info</label>
+            <div style="margin-top: 4px; padding: 12px; background: #f9fafb; border-radius: 8px; font-size: 14px; color: #374151;">
+                {{ mlef.accompanying_officer_info or 'Not recorded.' }}
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <a href="/clinical/{{ case.case_id }}/mlef" class="btn btn-primary btn-sm">📝 Edit MLEF</a>
+        </div>
+        {% else %}
+        <div class="empty-msg">No MLEF record found for this case.</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ===================== TAB: OBSERVATIONS ===================== -->
+<div id="observations" class="tab-panel">
+    <div class="card">
+        <div class="section-title">🔍 Clinical Observations</div>
+        {% if observations %}
+        <table class="mini-table">
+            <thead><tr><th>#</th><th>Findings</th></tr></thead>
+            <tbody>
+                {% for obs in observations %}
+                <tr><td>{{ loop.index }}</td><td>{{ obs.findings_text_encrypted }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-msg">No clinical observations recorded yet.</div>
+        {% endif %}
+        
+        <form action="/clinical/{{ case.case_id }}/observations" method="POST" class="inline-form">
+            <div class="form-group" style="flex: 3;">
+                <label class="form-label">New Observation</label>
+                <textarea name="findings" class="form-control" rows="2" placeholder="Enter clinical findings..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="height: fit-content;">+ Add</button>
+        </form>
+    </div>
+</div>
+
+<!-- ===================== TAB: WOUNDS ===================== -->
+<div id="wounds" class="tab-panel">
+    <div class="card">
+        <div class="section-title">🩹 Wound Chart</div>
+        {% if wounds %}
+        <table class="mini-table">
+            <thead><tr><th>Type</th><th>Weapon Suspected</th><th>Anatomical Location</th></tr></thead>
+            <tbody>
+                {% for w in wounds %}
+                <tr><td>{{ w.wound_type or '—' }}</td><td>{{ w.weapon_suspected or '—' }}</td><td>{{ w.anatomical_location or '—' }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-msg">No wound chart entries yet.</div>
+        {% endif %}
+        
+        <form action="/clinical/{{ case.case_id }}/wounds" method="POST" class="inline-form">
+            <div class="form-group">
+                <label class="form-label">Wound Type</label>
+                <select name="wound_type" class="form-control">
+                    <option value="Abrasion">Abrasion</option>
+                    <option value="Contusion">Contusion</option>
+                    <option value="Laceration">Laceration</option>
+                    <option value="Incised Wound">Incised Wound</option>
+                    <option value="Stab Wound">Stab Wound</option>
+                    <option value="Fracture">Fracture</option>
+                    <option value="Burn">Burn</option>
+                    <option value="Bite Mark">Bite Mark</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Weapon Suspected</label>
+                <input type="text" name="weapon_suspected" class="form-control" placeholder="e.g. Blunt object">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Anatomical Location</label>
+                <input type="text" name="anatomical_location" class="form-control" placeholder="e.g. Left forearm">
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="height: fit-content;">+ Add</button>
+        </form>
+    </div>
+</div>
+
+<!-- ===================== TAB: INVESTIGATIONS ===================== -->
+<div id="investigations" class="tab-panel">
+    <div class="card">
+        <div class="section-title">🧪 Investigations & Test Requests</div>
+        {% if investigations %}
+        <table class="mini-table">
+            <thead><tr><th>Request ID</th><th>Status</th><th>Result Files</th></tr></thead>
+            <tbody>
+                {% for inv in investigations %}
+                <tr>
+                    <td>#{{ inv.request_id }}</td>
+                    <td><span class="badge-sm {{ 'badge-dispatched' if inv.request_status == 'Completed' else 'badge-pending' }}">{{ inv.request_status }}</span></td>
+                    <td>{{ inv.result_files or 'No results yet' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-msg">No investigation requests created yet.</div>
+        {% endif %}
+        
+        <form action="/clinical/{{ case.case_id }}/investigations" method="POST" class="inline-form">
+            <span style="font-size: 13px; color: #6b7280;">Create a new investigation request (X-ray, CT, Blood, Toxicology, Swabs, Histology)</span>
+            <button type="submit" class="btn btn-primary btn-sm">+ New Request</button>
+        </form>
+    </div>
+</div>
+
+<!-- ===================== TAB: REFERRALS ===================== -->
+<div id="referrals" class="tab-panel">
+    <div class="card">
+        <div class="section-title">🏥 Consultation Referrals</div>
+        {% if referrals %}
+        <table class="mini-table">
+            <thead><tr><th>Specialty</th><th>Status</th></tr></thead>
+            <tbody>
+                {% for r in referrals %}
+                <tr><td>{{ r.referred_to_specialty }}</td><td><span class="badge-sm badge-pending">{{ r.referral_status }}</span></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-msg">No referrals created yet.</div>
+        {% endif %}
+        
+        <form action="/clinical/{{ case.case_id }}/referrals" method="POST" class="inline-form">
+            <div class="form-group">
+                <label class="form-label">Referred to Specialty</label>
+                <select name="referred_to_specialty" class="form-control">
+                    <option value="Psychiatry">Psychiatry</option>
+                    <option value="Paediatrics">Paediatrics</option>
+                    <option value="Gynaecology & Obstetrics">Gynaecology & Obstetrics</option>
+                    <option value="Orthopaedics">Orthopaedics</option>
+                    <option value="Neurology">Neurology</option>
+                    <option value="Radiology">Radiology</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select name="referral_status" class="form-control">
+                    <option value="Pending">Pending</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="height: fit-content;">+ Add</button>
+        </form>
+    </div>
+</div>
+
+<!-- ===================== TAB: PHOTOS ===================== -->
+<div id="photos" class="tab-panel">
+    <div class="card">
+        <div class="section-title">📷 Case Photographs & Digital Assets</div>
+        {% if photos %}
+        <table class="mini-table">
+            <thead><tr><th>Asset ID</th><th>Type</th><th>Uploaded By</th></tr></thead>
+            <tbody>
+                {% for p in photos %}
+                <tr><td>#{{ p.asset_id }}</td><td>{{ p.asset_type or 'Photo' }}</td><td>User #{{ p.uploaded_by }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-msg">No photographs uploaded yet.</div>
+        {% endif %}
+        
+        <form action="/clinical/{{ case.case_id }}/photos" method="POST" enctype="multipart/form-data" class="inline-form">
+            <div class="form-group">
+                <label class="form-label">Asset Type</label>
+                <select name="asset_type" class="form-control">
+                    <option value="Photograph">Photograph</option>
+                    <option value="X-Ray">X-Ray</option>
+                    <option value="CT Scan">CT Scan</option>
+                    <option value="Document Scan">Document Scan</option>
+                    <option value="Consent Scan">Consent Scan</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Select File</label>
+                <input type="file" name="photo" class="form-control" accept="image/*,.pdf" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="height: fit-content;">📤 Upload</button>
+        </form>
+    </div>
+</div>
+
+<!-- ===================== TAB: COURT & REPORTS ===================== -->
+<div id="court" class="tab-panel">
+    <div class="card">
+        <div class="section-title">⚖️ Report Status & Court Submissions</div>
+        
+        <!-- MLR Status -->
+        <div style="margin-bottom: 24px;">
+            <label style="font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Current MLR Status</label>
+            <div style="margin-top: 6px;">
+                {% set status = mlr.report_status if mlr else 'Pending Exam' %}
+                {% if status == 'Pending Exam' %}
+                    <span class="badge-sm badge-pending">{{ status }}</span>
+                {% elif status == 'PMR/MLEF Drafted' %}
+                    <span class="badge-sm badge-drafted">{{ status }}</span>
+                {% elif status == 'Dispatched' %}
+                    <span class="badge-sm badge-dispatched">{{ status }}</span>
+                {% else %}
+                    <span class="badge-sm badge-received">{{ status }}</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <form action="/clinical/{{ case.case_id }}/mlr-status" method="POST" class="inline-form">
+            <div class="form-group">
+                <label class="form-label">Update Report Status</label>
+                <select name="report_status" class="form-control">
+                    <option value="Pending Exam">Pending Exam</option>
+                    <option value="PMR/MLEF Drafted">MLEF Drafted</option>
+                    <option value="Dispatched">Dispatched</option>
+                    <option value="Received by Court">Received by Court</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="height: fit-content;">Update Status</button>
+        </form>
+        
+        <!-- Court submissions -->
+        <div style="margin-top: 28px;">
+            <div class="section-title">📨 Court Submissions</div>
+            {% if court %}
+            <table class="mini-table">
+                <thead><tr><th>Court</th><th>Trial Date</th><th>Receipt</th></tr></thead>
+                <tbody>
+                    {% for cs in court %}
+                    <tr>
+                        <td>{{ cs.court_name or '—' }}</td>
+                        <td>{{ cs.trial_date.strftime('%b %d, %Y') if cs.trial_date else '—' }}</td>
+                        <td>{{ '✅ Received' if cs.receipt_scan_path else '❌ Pending' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-msg">No court submissions for this case.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function switchTab(e, tabId) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+}
+</script>
+{% endblock %}
