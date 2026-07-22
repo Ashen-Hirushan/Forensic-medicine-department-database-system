@@ -76,3 +76,37 @@ def pm_register():
     
     records = execute_query(query, tuple(params))
     return render_template('reports/pm_register.html', records=records, search=search)
+
+
+@reports_bp.route('/mlr/<int:case_id>/print', methods=['GET'])
+@login_required
+def print_mlr(case_id):
+    case = execute_query("""
+        SELECT ce.*, ls.name_encrypted, ls.nic_encrypted, ls.age, ls.gender
+        FROM clinical_examinations ce
+        JOIN living_subjects ls ON ce.subject_id = ls.subject_id
+        WHERE ce.case_id = %s
+    """, (case_id,), fetch_all=False)
+    
+    mlef = execute_query("SELECT * FROM mlef_records WHERE clinical_case_id = %s", (case_id,), fetch_all=False)
+    mlr = execute_query("SELECT * FROM mlr_documents WHERE clinical_case_id = %s", (case_id,), fetch_all=False)
+    wounds = execute_query("SELECT * FROM wound_charts WHERE clinical_case_id = %s", (case_id,))
+    observations = execute_query("SELECT * FROM clinical_observations WHERE clinical_case_id = %s", (case_id,))
+    
+    return render_template('reports/print_mlr.html', case=case, mlef=mlef, mlr=mlr, wounds=wounds, observations=observations)
+
+
+@reports_bp.route('/pmr/<int:case_id>/print', methods=['GET'])
+@login_required
+def print_pmr(case_id):
+    case = execute_query("""
+        SELECT pi.*, c.name_encrypted, c.nic_encrypted, c.estimated_age, c.gender
+        FROM postmortem_investigations pi
+        JOIN cadavers c ON pi.cadaver_id = c.cadaver_id
+        WHERE pi.case_id = %s
+    """, (case_id,), fetch_all=False)
+    
+    pmr = execute_query("SELECT * FROM pmr_drafts WHERE autopsy_case_id = %s", (case_id,), fetch_all=False)
+    cod = execute_query("SELECT * FROM death_certificates WHERE autopsy_case_id = %s", (case_id,), fetch_all=False)
+    
+    return render_template('reports/print_pmr.html', case=case, pmr=pmr, cod=cod)

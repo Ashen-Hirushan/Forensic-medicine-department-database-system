@@ -98,3 +98,86 @@ def upload_picture():
         
     return redirect('/profile')
 
+
+@auth_bp.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        full_name = request.form.get('full_name', '').strip()
+        designation = request.form.get('designation', '').strip()
+        username = request.form.get('username', '').strip()
+        role_id = request.form.get('role_id')
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        slmc_reg_no = request.form.get('slmc_reg_no', '').strip()
+
+        # Validation
+        if not full_name or not username or not password:
+            flash("Full name, username, and password are required.", "error")
+            return redirect('/signup')
+
+        if password != confirm_password:
+            flash("Passwords do not match.", "error")
+            return redirect('/signup')
+
+        if len(password) < 6:
+            flash("Password must be at least 6 characters.", "error")
+            return redirect('/signup')
+
+        # Check if username already exists
+        existing = execute_query(
+            "SELECT user_id FROM system_users WHERE username = %s",
+            (username,), fetch_all=False
+        )
+        if existing:
+            flash("Username already exists. Please choose another.", "error")
+            return redirect('/signup')
+
+        # Create user, staff, and optionally doctor
+        try:
+            pw_hash = hash_password(password)
+
+            # 1. Insert into system_users
+            execute_query(
+                "INSERT INTO system_users (role_id, username, password_hash) VALUES (%s, %s, %s)",
+                (role_id, username, pw_hash)
+            )
+
+            # Get the new user_id
+            new_user = execute_query(
+                "SELECT user_id FROM system_users WHERE username = %s",
+                (username,), fetch_all=False
+            )
+            user_id = new_user['user_id']
+
+            # 2. Insert into staff_directory
+            execute_query(
+                "INSERT INTO staff_directory (user_id, full_name, designation) VALUES (%s, %s, %s)",
+                (user_id, full_name, designation or None)
+            )
+
+            # 3. If SLMC reg no is provided, create a medical officer entry
+            if slmc_reg_no:
+                staff = execute_query(
+                    "SELECT staff_id FROM staff_directory WHERE user_id = %s",
+                    (user_id,), fetch_all=False
+                )
+                if staff:
+                    execute_query(
+                        "INSERT INTO medical_officers (staff_id, slmc_reg_no) VALUES (%s, %s)",
+                        (staff['staff_id'], slmc_reg_no)
+                    )
+
+            flash("Account created successfully! Please log in.", "success")
+            return redirect('/login')
+
+        except Exception as e:
+            flash(f"Registration failed: {str(e)}", "error")
+            return redirect('/signup')
+
+    # GET: Fetch roles for the dropdown
+    roles = execute_query("SELECT role_id, role_name FROM access_roles ORDER BY role_id")
+    if not roles:
+        roles = []
+
+    return render_template('signup.html', roles=roles)
+

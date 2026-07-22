@@ -29,6 +29,7 @@ def create_app(config_class=Config):
     from app.routes.alerts import alerts_bp
     from app.routes.reports import reports_bp
     from app.routes.admin import admin_bp
+    from app.routes.patients import patients_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -39,11 +40,20 @@ def create_app(config_class=Config):
     app.register_blueprint(alerts_bp, url_prefix='/alerts')
     app.register_blueprint(reports_bp, url_prefix='/reports')
     app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(patients_bp, url_prefix='/patients')
 
     # Redirect root to login
-    from flask import redirect
+    from flask import redirect, render_template
     @app.route('/')
     def index():
         return redirect('/login')
+
+    @app.errorhandler(403)
+    def forbidden(e):
+        return render_template('errors/403.html'), 403
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template('errors/404.html'), 404
 
     return app

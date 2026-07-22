@@ -505,3 +505,29 @@ def add_peer_review(case_id):
     except Exception as e:
         flash(f"Error adding peer review: {str(e)}", "error")
     return redirect(f'/clinical/{case_id}')
+
+
+# ---------------------------------------------------------------------------
+# REFERRALS — Clinical Consultation Referrals
+# ---------------------------------------------------------------------------
+@clinical_bp.route('/<int:case_id>/referrals', methods=['GET', 'POST'])
+@login_required
+@roles_allowed('Admin', 'Doctor')
+def referrals(case_id):
+    if request.method == 'POST':
+        specialty = request.form.get('specialty')
+        status = request.form.get('status', 'Pending')
+        try:
+            execute_query("""
+                INSERT INTO consultation_referrals (clinical_case_id, referred_to_specialty, referral_status)
+                VALUES (%s, %s, %s)
+            """, (case_id, specialty, status))
+            flash("Referral created successfully.", "success")
+        except Exception as e:
+            flash(f"Error creating referral: {e}", "error")
+        return redirect(f'/clinical/{case_id}')
+        
+    # GET method - render the referral page
+    case = execute_query("SELECT reference_no FROM clinical_examinations WHERE case_id = %s", (case_id,), fetch_all=False)
+    referrals_list = execute_query("SELECT * FROM consultation_referrals WHERE clinical_case_id = %s", (case_id,))
+    return render_template('clinical/referrals.html', case=case, case_id=case_id, referrals=referrals_list)

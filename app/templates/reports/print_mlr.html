@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Medico-Legal Report - {{ case.reference_no }}</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            line-height: 1.5;
+            color: #000;
+            background: #fff;
+            margin: 0;
+            padding: 20px 40px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            text-transform: uppercase;
+        }
+        .header h2 {
+            margin: 5px 0 0;
+            font-size: 18px;
+        }
+        .meta-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-weight: bold;
+            font-size: 16px;
+            text-decoration: underline;
+            margin-bottom: 10px;
+        }
+        .field {
+            margin-bottom: 8px;
+        }
+        .label {
+            font-weight: bold;
+        }
+        .signature-block {
+            margin-top: 60px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 250px;
+            text-align: center;
+            padding-top: 5px;
+        }
+        
+        @media print {
+            body { padding: 0; }
+            @page { margin: 2cm; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="margin-bottom: 20px; text-align: right;">
+        <button onclick="window.print()" style="padding: 8px 16px; background: #2563eb; color: #fff; border: none; cursor: pointer;">🖨️ Print Report</button>
+        <button onclick="window.close()" style="padding: 8px 16px; background: #6b7280; color: #fff; border: none; cursor: pointer;">Close</button>
+    </div>
+
+    <div class="header">
+        <h1>Official Medico-Legal Report</h1>
+        <h2>Department of Forensic Medicine</h2>
+    </div>
+
+    <div class="meta-info">
+        <div>
+            <div class="field"><span class="label">Reference No:</span> {{ case.reference_no }}</div>
+            <div class="field"><span class="label">Patient Name:</span> {{ case.name_encrypted }}</div>
+            <div class="field"><span class="label">NIC:</span> {{ case.nic_encrypted }}</div>
+        </div>
+        <div>
+            <div class="field"><span class="label">Examination Date:</span> {{ case.admission_date.strftime('%Y-%m-%d %H:%M') if case.admission_date else 'N/A' }}</div>
+            <div class="field"><span class="label">Age/Gender:</span> {{ case.age }} / {{ case.gender }}</div>
+        </div>
+    </div>
+
+    {% if mlef %}
+    <div class="section">
+        <div class="section-title">1. Initial MLEF Details</div>
+        <div class="field"><span class="label">Category of Hurt:</span> {{ mlef.category_of_hurt if mlef.category_of_hurt else 'Not Specified' }}</div>
+        <div class="field"><span class="label">Consent Obtained:</span> {{ 'Yes' if mlef.consent_obtained else 'No' }}</div>
+    </div>
+    {% endif %}
+
+    {% if mlr %}
+    <div class="section">
+        <div class="section-title">2. History of Incident</div>
+        <p>{{ mlr.history_of_incident if mlr.history_of_incident else 'No history recorded.' }}</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. Examination Findings</div>
+        <p>{{ mlr.examination_findings if mlr.examination_findings else 'No additional findings recorded.' }}</p>
+        
+        {% if observations %}
+        <div style="margin-top: 10px;">
+            <strong>Clinical Observations:</strong>
+            <ul>
+                {% for obs in observations %}
+                <li>{{ obs.findings_text_encrypted }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if wounds %}
+        <div style="margin-top: 10px;">
+            <strong>Wound Chart:</strong>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 5px;">
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid #000; padding: 4px; text-align: left;">Wound Type</th>
+                        <th style="border: 1px solid #000; padding: 4px; text-align: left;">Weapon Suspected</th>
+                        <th style="border: 1px solid #000; padding: 4px; text-align: left;">Anatomical Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for w in wounds %}
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ w.wound_type or '—' }}</td>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ w.weapon_suspected or '—' }}</td>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ w.anatomical_location or '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="section">
+        <div class="section-title">4. Conclusion & Opinion</div>
+        <p>{{ mlr.conclusions if mlr.conclusions else 'No conclusions recorded.' }}</p>
+        <p><strong>Final Opinion:</strong> {{ mlr.opinion_encrypted if mlr.opinion_encrypted else 'Pending' }}</p>
+    </div>
+    {% else %}
+    <div class="section">
+        <p><em>This MLR has not been drafted yet.</em></p>
+    </div>
+    {% endif %}
+
+    <div class="signature-block">
+        <div class="signature-line">
+            Signature of Examining Medical Officer
+            <br><br>Date: __________________
+        </div>
+    </div>
+</body>
+</html>
