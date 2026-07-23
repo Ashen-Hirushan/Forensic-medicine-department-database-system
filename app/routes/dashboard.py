@@ -90,7 +90,7 @@ def dashboard():
                COALESCE(clinical.cnt, 0) AS clinical_count,
                COALESCE(autopsy.cnt, 0) AS autopsy_count
         FROM (
-            SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL n MONTH), '%%b') AS month_label,
+            SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL n MONTH), '%b') AS month_label,
                    MONTH(DATE_SUB(CURDATE(), INTERVAL n MONTH)) AS month_num,
                    YEAR(DATE_SUB(CURDATE(), INTERVAL n MONTH)) AS year_num
             FROM (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5) nums
