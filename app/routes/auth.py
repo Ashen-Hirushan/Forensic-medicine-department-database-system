@@ -134,6 +134,10 @@ def signup():
         confirm_password = request.form.get("confirm_password", "")
         slmc_reg_no = request.form.get("slmc_reg_no", "").strip()
 
+        if str(role_id) == "1":
+            flash("Creating new Admin accounts is not permitted.", "error")
+            return redirect("/signup")
+
         # Validation
         if not full_name or not username or not password:
             flash("Full name, username, and password are required.", "error")
@@ -201,9 +205,9 @@ def signup():
             flash(f"Registration failed: {str(e)}", "error")
             return redirect("/signup")
 
-    # GET: Fetch roles for the dropdown
+    # GET: Fetch roles for the dropdown (excluding Admin)
     roles = execute_query(
-        "SELECT role_id, role_name FROM access_roles ORDER BY role_id"
+        "SELECT role_id, role_name FROM access_roles WHERE role_id != 1 ORDER BY role_id"
     )
     if not roles:
         roles = []

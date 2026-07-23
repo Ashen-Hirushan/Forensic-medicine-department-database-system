@@ -58,7 +58,8 @@ When the system is set up for the first time, it automatically creates sample ac
 
 | Role | Username | What they can do |
 |------|----------|------------------|
-| **System Admin** | `admin_user` | Full access. Can view the Audit Log, manage users, and delete user profiles. |
+| **System Admin 1** | `admin1` | Full access. Can view the Audit Log, manage users, and delete user profiles. |
+| **System Admin 2** | `admin2` | Full access. Can view the Audit Log, manage users, and delete user profiles. |
 | **Medical Officer (JMO)** | `dr_chathula` | Can examine patients, conduct postmortems, order lab tests, and write official reports (MLEF/PMR). |
 | **Department Clerk** | `clerk_nimal` | Registers new cases (Living Subjects and Cadavers) and prepares court dispatches. |
 | **Lab Technician** | `lab_kamal` | Receives evidence via chain of custody, conducts tests, and uploads lab results. |

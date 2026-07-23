@@ -55,21 +55,23 @@ def seed_database():
             salt = bcrypt.gensalt()
             hashed_pwd = bcrypt.hashpw(b"securepass123", salt).decode('utf-8')
             users_data = [
-                (1, 1, 'admin_user', hashed_pwd, False),
+                (1, 1, 'admin1', hashed_pwd, False),
                 (2, 2, 'dr_chathula', hashed_pwd, False),
                 (3, 2, 'dr_perera', hashed_pwd, False),
                 (4, 3, 'clerk_nimal', hashed_pwd, False),
-                (5, 4, 'lab_kamal', hashed_pwd, False)
+                (5, 4, 'lab_kamal', hashed_pwd, False),
+                (6, 1, 'admin2', hashed_pwd, False)
             ]
             cursor.executemany("INSERT INTO system_users (user_id, role_id, username, password_hash, account_locked) VALUES (%s, %s, %s, %s, %s)", users_data)
 
             # 3. Seed staff_directory
             staff_data = [
-                (1, 1, 'Admin Officer', 'System Administrator'),
+                (1, 1, 'Admin Officer 1', 'System Administrator'),
                 (2, 2, 'Dr. Chathula Wickramasinghe', 'Consultant JMO'),
                 (3, 3, 'Dr. Suneth Perera', 'Assistant JMO'),
                 (4, 4, 'Nimal Fernando', 'Chief Clerk'),
-                (5, 5, 'Kamal Silva', 'Senior Lab Technician')
+                (5, 5, 'Kamal Silva', 'Senior Lab Technician'),
+                (6, 6, 'Admin Officer 2', 'System Administrator')
             ]
             cursor.executemany("INSERT INTO staff_directory (staff_id, user_id, full_name, designation) VALUES (%s, %s, %s, %s)", staff_data)
 
