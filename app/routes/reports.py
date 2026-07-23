@@ -96,6 +96,21 @@ def print_mlr(case_id):
     return render_template('reports/print_mlr.html', case=case, mlef=mlef, mlr=mlr, wounds=wounds, observations=observations)
 
 
+@reports_bp.route('/mlef/<int:case_id>/print', methods=['GET'])
+@login_required
+def print_mlef(case_id):
+    case = execute_query("""
+        SELECT ce.*, ls.name_encrypted, ls.nic_encrypted, ls.age, ls.gender
+        FROM clinical_examinations ce
+        JOIN living_subjects ls ON ce.subject_id = ls.subject_id
+        WHERE ce.case_id = %s
+    """, (case_id,), fetch_all=False)
+    
+    mlef = execute_query("SELECT * FROM mlef_records WHERE clinical_case_id = %s", (case_id,), fetch_all=False)
+    
+    return render_template('reports/print_mlef.html', case=case, mlef=mlef)
+
+
 @reports_bp.route('/pmr/<int:case_id>/print', methods=['GET'])
 @login_required
 def print_pmr(case_id):

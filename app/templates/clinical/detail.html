@@ -52,7 +52,9 @@
     </div>
     <div style="display: flex; gap: 8px;">
         <a href="/clinical/{{ case.case_id }}/mlef" class="btn btn-primary btn-sm">📝 Edit MLEF</a>
-        <a href="/clinical/{{ case.case_id }}/mlr" class="btn btn-primary btn-sm" style="background: #0369a1; border-color: #0369a1;">📄 MLR Report</a>
+        <a href="/reports/mlef/{{ case.case_id }}/print" target="_blank" class="btn btn-primary btn-sm" style="background: #0d9488; border-color: #0d9488;">🖨️ Print MLEF</a>
+        <a href="/clinical/{{ case.case_id }}/mlr" class="btn btn-primary btn-sm" style="background: #0369a1; border-color: #0369a1;">📝 Draft MLR</a>
+        <a href="/reports/mlr/{{ case.case_id }}/print" target="_blank" class="btn btn-primary btn-sm" style="background: #047857; border-color: #047857;">🖨️ Print MLR</a>
         <a href="/clinical" class="btn btn-secondary btn-sm">← Back to List</a>
     </div>
 </div>
