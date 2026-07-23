@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Daily Report{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="page-header">
+        <h2>Daily Clinical Cases</h2>
+        <button onclick="window.print()" class="btn btn-secondary">🖨️ Print Report</button>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Case ID</th>
+                    <th>Reference No</th>
+                    <th>Hospital BHT</th>
+                    <th>Incident Date</th>
+                    <th>Admission Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for case in cases %}
+                <tr>
+                    <td>{{ case.case_id }}</td>
+                    <td>{{ case.reference_no or '—' }}</td>
+                    <td>{{ case.hospital_bht_no or '—' }}</td>
+                    <td>{{ case.incident_date or '—' }}</td>
+                    <td>{{ case.admission_date or '—' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="empty-state">No cases logged recently.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

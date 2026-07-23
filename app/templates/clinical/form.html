@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Register Clinical Case{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 860px;">
+    <h2 style="font-size: var(--font-size-xl); font-weight: 600; margin-bottom: var(--space-6);">New Clinical Examination (MLEF)</h2>
+
+    <form action="/clinical/new" method="POST">
+        <!-- Patient Demographics -->
+        <div class="form-section">
+            <div class="form-section-title">Patient Demographics</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Patient NIC</label>
+                    <input type="text" name="nic" class="form-control" placeholder="e.g. 200012345678" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Patient Full Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="Full name" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Age</label>
+                    <input type="number" name="age" class="form-control" placeholder="e.g. 34" min="0" max="150">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Gender</label>
+                    <select name="gender" class="form-control">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Permanent Address</label>
+                    <input type="text" name="address" class="form-control" placeholder="Full address">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contact Number</label>
+                    <input type="text" name="contact" class="form-control" placeholder="e.g. 0771234567">
+                </div>
+            </div>
+        </div>
+
+        <!-- Case Details -->
+        <div class="form-section">
+            <div class="form-section-title">Case Details</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Hospital BHT No.</label>
+                    <input type="text" name="hospital_bht_no" class="form-control" placeholder="e.g. BHT-88123">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Police Reference No.</label>
+                    <input type="text" name="reference_no" class="form-control" placeholder="e.g. CW/CL/24-001">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Case Category</label>
+                    <select name="case_category" class="form-control">
+                        <option value="">— Select —</option>
+                        <option value="Trauma">Trauma</option>
+                        <option value="Domestic Abuse">Domestic Abuse</option>
+                        <option value="Sexual Abuse">Sexual Abuse</option>
+                        <option value="Child Abuse">Child Abuse</option>
+                        <option value="Detainee">Detainee Examination</option>
+                        <option value="Drug Addict">Drug Addict</option>
+                        <option value="Age Estimation">Age Estimation</option>
+                        <option value="DNA Sample">DNA Sample</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Referral Source</label>
+                    <select name="referral_source" class="form-control">
+                        <option value="">— Select —</option>
+                        <option value="Ward">Ward → Hospital Police → MLEF</option>
+                        <option value="Police Station">Police Station → MLEF</option>
+                        <option value="AG Office">Attorney General's Office</option>
+                        <option value="Human Rights Commission">Human Rights Commission</option>
+                        <option value="Court Order">Court Order</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Incident Date & Time</label>
+                    <input type="datetime-local" name="incident_date" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Admission Date & Time</label>
+                    <input type="datetime-local" name="admission_date" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignment -->
+        <div class="form-section">
+            <div class="form-section-title">Assignment</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Healthcare Facility</label>
+                    <select name="facility_id" class="form-control">
+                        {% for f in facilities %}
+                        <option value="{{ f.facility_id }}">{{ f.facility_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Police Station</label>
+                    <select name="station_id" class="form-control">
+                        {% for s in stations %}
+                        <option value="{{ s.station_id }}">{{ s.station_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Assigned Doctor</label>
+                    <select name="assigned_doctor_id" class="form-control">
+                        {% for d in doctors %}
+                        <option value="{{ d.doctor_id }}">{{ d.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="/clinical" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save & Register Case</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

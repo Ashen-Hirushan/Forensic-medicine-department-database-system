@@ -1,0 +1,198 @@
+/* =============================================
+   LAYOUT.CSS - Application Shell Structure
+   ============================================= */
+
+/* App Shell */
+.app-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ----- SIDEBAR ----- */
+.sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    padding: var(--space-5) var(--space-6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 60px;
+}
+
+.sidebar-header .logo-icon {
+    font-size: 1.4rem;
+}
+
+.sidebar-header h2 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+}
+
+.sidebar-nav {
+    flex-grow: 1;
+    padding: var(--space-3) 0;
+}
+
+.nav-section-label {
+    display: block;
+    padding: var(--space-4) var(--space-6) var(--space-2);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--sidebar-text);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-6);
+    margin: 1px var(--space-2);
+    border-radius: 6px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: var(--transition-fast);
+}
+
+.nav-item:hover {
+    background: var(--sidebar-hover-bg);
+    color: var(--sidebar-active-text);
+    text-decoration: none;
+}
+
+.nav-item.active {
+    background: var(--sidebar-active-bg);
+    color: var(--sidebar-active-text);
+}
+
+.nav-item .nav-icon {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* ----- MAIN CONTENT ----- */
+.main-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--bg-main);
+}
+
+/* ----- TOP NAVBAR ----- */
+.navbar {
+    height: 60px;
+    min-height: 60px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-6);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.nav-left .page-title {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.user-role {
+    display: inline-block;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--primary-color);
+    background: var(--primary-light);
+    padding: 2px 10px;
+    border-radius: 100px;
+}
+
+/* ----- CONTENT AREA ----- */
+.content-area {
+    padding: var(--space-6);
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* Page Header */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-6);
+}
+
+.page-header h2 {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ----- GRID LAYOUTS ----- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
+}
+
+@media (max-width: 1200px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .stats-row { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+}
+
+.two-col-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+}
+
+@media (max-width: 900px) {
+    .two-col-grid { grid-template-columns: 1fr; }
+}

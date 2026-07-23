@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Register Patient - Forensic Dept System{% endblock %}
+
+{% block content %}
+<div class="header-container" style="margin-bottom: 24px;">
+    <h2>Register Living Subject</h2>
+    <p class="text-muted">Register a patient independent of a specific clinical case.</p>
+</div>
+
+<div class="card" style="max-width: 800px;">
+    <form action="/patients/new" method="POST">
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label class="form-label">Full Name *</label>
+                <input type="text" name="name" class="form-control" required placeholder="e.g. John Doe">
+            </div>
+            <div class="col-md-6 form-group">
+                <label class="form-label">National Identity Card (NIC) *</label>
+                <input type="text" name="nic" class="form-control" required placeholder="e.g. 199012345678">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label class="form-label">Age</label>
+                <input type="number" name="age" class="form-control" min="0" max="150">
+            </div>
+            <div class="col-md-6 form-group">
+                <label class="form-label">Gender</label>
+                <select name="gender" class="form-control">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Contact Number</label>
+            <input type="text" name="contact" class="form-control" placeholder="e.g. 0771234567">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Permanent Address</label>
+            <textarea name="address" class="form-control" rows="3" placeholder="Enter full address..."></textarea>
+        </div>
+
+        <div class="form-actions" style="margin-top: 20px; display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Register Patient</button>
+            <a href="/patients" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

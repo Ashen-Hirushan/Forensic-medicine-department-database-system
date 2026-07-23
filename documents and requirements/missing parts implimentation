@@ -1,0 +1,128 @@
+# Implementation Plan: Close All Gaps
+
+Implement all missing features identified in the gap analysis to bring the system to ~90% coverage of Dr. Chathula's requirements.
+
+---
+
+## Phase 1 — Clinical Case Detail View + MLEF Editing
+
+### Database Schema Changes
+#### [MODIFY] [schema.sql](file:///d:/4th%20sem/database/New%20project/database/schema.sql)
+- Add `case_category ENUM('Trauma', 'Domestic Abuse', 'Sexual Abuse', 'Child Abuse', 'Detainee', 'Drug Addict', 'Age Estimation', 'DNA Sample', 'Other')` to `clinical_examinations`
+- Add `referral_source ENUM('Ward', 'Police Station', 'AG Office', 'Human Rights Commission', 'Court Order', 'Other')` to `clinical_examinations`
+- Run migration script to ALTER TABLE
+
+### Backend Routes
+#### [MODIFY] [clinical.py](file:///d:/4th%20sem/database/New%20project/app/routes/clinical.py)
+- `GET /clinical/<case_id>` — Detail view: joins `clinical_examinations`, `living_subjects`, `mlef_records`, `mlr_documents`, `clinical_observations`, `wound_charts`, `test_requests`, `consultation_referrals`, `digital_assets`
+- `GET/POST /clinical/<case_id>/mlef` — Full MLEF editing form (injury details, consent, wound types, category of hurt, alcohol, accompanying officer)
+- `GET/POST /clinical/<case_id>/observations` — Add/view clinical observations
+- `GET/POST /clinical/<case_id>/wounds` — Add wound chart entries
+- `POST /clinical/<case_id>/mlr-status` — Update MLR document status
+
+### Templates
+#### [NEW] `app/templates/clinical/detail.html` — Full case detail page with tabbed sections
+#### [NEW] `app/templates/clinical/mlef_form.html` — MLEF data entry form
+#### [MODIFY] `app/templates/clinical/list.html` — Add clickable links to detail view, show patient name, add "My Cases" filter
+
+---
+
+## Phase 2 — Autopsy Case Detail View + Cause of Death
+
+### Database Schema Changes
+#### [MODIFY] [schema.sql](file:///d:/4th%20sem/database/New%20project/database/schema.sql)
+- Add `manner_of_death ENUM('Natural', 'Accidental', 'Suicidal', 'Homicidal', 'Undetermined')` to `postmortem_investigations`
+- Run migration script
+
+### Backend Routes
+#### [MODIFY] [autopsy.py](file:///d:/4th%20sem/database/New%20project/app/routes/autopsy.py)
+- `GET /autopsy/<case_id>` — Detail view: joins `postmortem_investigations`, `cadavers`, `pmr_drafts`, `death_certificates`, `wound_charts`, `test_requests`, `digital_assets`, `voice_dictations`
+- `GET/POST /autopsy/<case_id>/cod` — Cause of death form (immediate, antecedent, contributory causes, maternal death flag)
+- `GET/POST /autopsy/<case_id>/wounds` — Add wound chart entries
+- `POST /autopsy/<case_id>/pmr-status` — Update PMR draft status
+- Update registration form to include `autopsy_date`, `manner_of_death`
+
+### Templates
+#### [NEW] `app/templates/autopsy/detail.html` — Full case detail page with tabbed sections
+#### [NEW] `app/templates/autopsy/cod_form.html` — Cause of death form
+#### [MODIFY] `app/templates/autopsy/list.html` — Add clickable links, patient name, "My Cases" filter
+#### [MODIFY] `app/templates/autopsy/form.html` — Add `autopsy_date` and `manner_of_death` fields
+
+---
+
+## Phase 3 — Investigations, Referrals & Reviews
+
+### Backend Routes
+#### [MODIFY] [evidence.py](file:///d:/4th%20sem/database/New%20project/app/routes/evidence.py) (or create new `investigations.py`)
+- `POST /investigations/request` — Create a new test request (X-ray, CT, blood, urine toxicology, swabs, histology)
+- `GET /investigations/<case_type>/<case_id>` — List all test requests & results for a case
+- `POST /referrals/new` — Create consultation referral (psychiatry, paediatrics, gyn-obs)
+- `GET /referrals/<case_id>` — List referrals for a case
+
+### Templates
+These will be embedded as tab sections within the clinical/autopsy detail pages rather than standalone pages.
+
+---
+
+## Phase 4 — Photograph & Digital Asset Management
+
+### Backend Routes
+#### [NEW] `app/routes/photos.py`
+- `POST /photos/upload` — Upload photo for clinical or autopsy case
+- `GET /photos/<case_type>/<case_id>` — Gallery view (returns JSON for AJAX or renders page)
+- `DELETE /photos/<asset_id>` — Remove photo
+
+### Templates
+Photo gallery will be rendered as a tab within detail views, using a responsive grid layout.
+
+---
+
+## Phase 5 — Enhanced Case Lists + Per-Doctor Filtering
+
+### Backend Changes
+#### [MODIFY] [clinical.py](file:///d:/4th%20sem/database/New%20project/app/routes/clinical.py)
+- Add query parameter `?doctor_id=X` for "My Cases" filtering
+- Join `living_subjects` to show patient name in list
+- Join `mlr_documents` to show report status badge
+
+#### [MODIFY] [autopsy.py](file:///d:/4th%20sem/database/New%20project/app/routes/autopsy.py)
+- Same: doctor filter, cadaver name, PMR status badge
+
+### Template Changes
+- Add filter dropdown at top of both list pages
+- Make case IDs clickable links to detail views
+- Show status badges
+
+---
+
+## Phase 6 — MLEF Register, PM Register & Report Templates
+
+### Backend Routes
+#### [MODIFY] [reports.py](file:///d:/4th%20sem/database/New%20project/app/routes/reports.py)
+- `GET /reports/mlef-register` — Full MLEF register with search/filter
+- `GET /reports/pm-register` — Full PM register with search/filter
+
+### Templates
+#### [NEW] `app/templates/reports/mlef_register.html` — Searchable MLEF register table
+#### [NEW] `app/templates/reports/pm_register.html` — Searchable PM register table
+
+### Sidebar Update
+#### [MODIFY] [sidebar.html](file:///d:/4th%20sem/database/New%20project/app/templates/components/sidebar.html)
+- Add links for MLEF Register and PM Register under Analytics
+
+---
+
+## Verification Plan
+
+### Manual Verification
+After each phase:
+1. Navigate to the new pages and verify they render correctly
+2. Submit forms and verify data is saved to the database
+3. Verify role-based access restrictions work
+4. Hard refresh browser to clear CSS/JS cache
+
+### Functional Tests
+- Register a new clinical case → open detail view → fill MLEF → add wounds → request investigation → add referral → upload photo → update MLR status → verify all data persists
+- Register a new autopsy case → open detail view → fill cause of death → add wounds → update PMR status → verify all data persists
+- Test "My Cases" filter with different doctor logins
+- Verify MLEF register and PM register show searchable data

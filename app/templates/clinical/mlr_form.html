@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block page_title %}MLR Report — {{ case.reference_no }}{% endblock %}
+
+{% block content %}
+<style>
+    .report-header { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+    .report-header h2 { font-size: 20px; font-weight: 700; color: #0c4a6e; margin: 0 0 4px 0; }
+    .report-header .sub { font-size: 13px; color: #0369a1; }
+    .report-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+    .report-meta-item { background: #ffffff; padding: 10px 14px; border-radius: 8px; border: 1px solid #e0f2fe; }
+    .report-meta-item label { font-size: 11px; color: #0369a1; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+    .report-meta-item .val { font-size: 14px; color: #0c4a6e; font-weight: 600; margin-top: 2px; }
+    
+    .ref-panel { background: #fefce8; border: 1px solid #fde68a; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; }
+    .ref-panel h4 { margin: 0 0 10px 0; font-size: 14px; font-weight: 600; color: #92400e; }
+    .ref-item { font-size: 13px; color: #78350f; padding: 3px 0; }
+    .ref-item strong { color: #451a03; }
+    
+    .print-only { display: none; }
+    @media print {
+        .no-print { display: none !important; }
+        .print-only { display: block; }
+        .report-header { border: 2px solid #000; background: #fff; }
+        .report-header h2, .report-header .sub { color: #000; }
+        .report-meta-item label, .report-meta-item .val { color: #000; }
+    }
+</style>
+
+<!-- Report Header (shows case context) -->
+<div class="report-header no-print">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+            <h2>📝 Medico-Legal Report (MLR)</h2>
+            <div class="sub">Compose or edit the official MLR for case {{ case.reference_no }}</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button onclick="window.print()" class="btn btn-secondary btn-sm">🖨️ Print MLR</button>
+            <a href="/clinical/{{ case_id }}" class="btn btn-secondary btn-sm">← Back to Case</a>
+        </div>
+    </div>
+    <div class="report-meta">
+        <div class="report-meta-item">
+            <label>Patient</label>
+            <div class="val">{{ case.patient_name }}</div>
+        </div>
+        <div class="report-meta-item">
+            <label>NIC</label>
+            <div class="val">{{ case.patient_nic or '—' }}</div>
+        </div>
+        <div class="report-meta-item">
+            <label>Age / Gender</label>
+            <div class="val">{{ case.age or '—' }} yrs / {{ case.gender or '—' }}</div>
+        </div>
+        <div class="report-meta-item">
+            <label>Reference No</label>
+            <div class="val">{{ case.reference_no }}</div>
+        </div>
+        <div class="report-meta-item">
+            <label>Hospital BHT</label>
+            <div class="val">{{ case.hospital_bht_no or '—' }}</div>
+        </div>
+        <div class="report-meta-item">
+            <label>Examining Doctor</label>
+            <div class="val">{{ case.doctor_name or '—' }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Reference panel: existing MLEF data, wounds, observations -->
+{% if mlef or wounds or observations %}
+<div class="ref-panel no-print">
+    <h4>📋 Quick Reference (from MLEF & Case Data)</h4>
+    {% if mlef %}
+    <div class="ref-item"><strong>MLEF Number:</strong> {{ mlef.mlef_number or 'Not assigned' }}</div>
+    <div class="ref-item"><strong>Category of Hurt (MLEF):</strong> {{ mlef.category_of_hurt or 'Not classified' }}</div>
+    <div class="ref-item"><strong>Injury Details (MLEF):</strong> {{ mlef.injury_details or 'None recorded' }}</div>
+    <div class="ref-item"><strong>Injury Types:</strong> 
+        {% set types = [] %}
+        {% if mlef.has_abrasion %}{% set _ = types.append('Abrasion') %}{% endif %}
+        {% if mlef.has_contusion %}{% set _ = types.append('Contusion') %}{% endif %}
+        {% if mlef.has_laceration %}{% set _ = types.append('Laceration') %}{% endif %}
+        {% if mlef.has_stab %}{% set _ = types.append('Stab') %}{% endif %}
+        {% if mlef.has_fracture %}{% set _ = types.append('Fracture') %}{% endif %}
+        {% if mlef.has_burn %}{% set _ = types.append('Burn') %}{% endif %}
+        {{ types|join(', ') if types else 'None marked' }}
+    </div>
+    {% endif %}
+    {% if wounds %}
+    <div class="ref-item" style="margin-top: 8px;"><strong>Wound Chart ({{ wounds|length }} entries):</strong></div>
+    {% for w in wounds %}
+    <div class="ref-item" style="padding-left: 16px;">• {{ w.wound_type }} — {{ w.anatomical_location or 'location not specified' }} {% if w.weapon_suspected %}({{ w.weapon_suspected }}){% endif %}</div>
+    {% endfor %}
+    {% endif %}
+    {% if observations %}
+    <div class="ref-item" style="margin-top: 8px;"><strong>Clinical Observations ({{ observations|length }}):</strong></div>
+    {% for obs in observations %}
+    <div class="ref-item" style="padding-left: 16px;">• {{ obs.findings_text_encrypted }}</div>
+    {% endfor %}
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- MLR Report Form -->
+<div class="card" style="max-width: 900px;">
+    <form action="/clinical/{{ case_id }}/mlr" method="POST">
+        
+        <!-- Section 1: History -->
+        <div class="form-section">
+            <div class="form-section-title">1. History of the Incident</div>
+            <div class="form-group">
+                <label class="form-label">Describe the history as given by the patient / informant / police</label>
+                <textarea name="history_of_incident" class="form-control" rows="5" 
+                          placeholder="On [date] at approximately [time], the patient states that [describe incident as narrated]...">{{ mlr.history_of_incident if mlr else '' }}</textarea>
+                <div class="form-hint">Record the history as narrated. Include date, time, place of incident, and nature of assault/accident.</div>
+            </div>
+        </div>
+
+        <!-- Section 2: Examination Findings -->
+        <div class="form-section">
+            <div class="form-section-title">2. Examination Findings</div>
+            <div class="form-group">
+                <label class="form-label">Detailed clinical examination findings</label>
+                <textarea name="examination_findings" class="form-control" rows="8" 
+                          placeholder="General appearance: [describe]
+                          
+Injury 1: [Type] - [Size] x [Size] - [Location] - [Description of margins, edges, depth etc.]
+
+Injury 2: ...
+
+Other relevant findings: ...">{{ mlr.examination_findings if mlr else '' }}</textarea>
+                <div class="form-hint">Describe each injury systematically: type, size, shape, site, edges, margins, floor, surrounding area. Include negative findings where relevant.</div>
+            </div>
+        </div>
+
+        <!-- Section 3: Opinion -->
+        <div class="form-section">
+            <div class="form-section-title">3. Medico-Legal Opinion</div>
+            <div class="form-group">
+                <label class="form-label">Doctor's medico-legal opinion</label>
+                <textarea name="opinion" class="form-control" rows="5" 
+                          placeholder="In my opinion, the injuries described above are consistent with [mechanism]...
+
+The injuries are [recent/old] and are approximately [duration] old.
+
+The injuries could have been caused by [type of weapon/force]...">{{ mlr.opinion_encrypted if mlr else '' }}</textarea>
+                <div class="form-hint">State your professional opinion on the nature, causation, and age of injuries.</div>
+            </div>
+        </div>
+
+        <!-- Section 4: Category of Hurt -->
+        <div class="form-section">
+            <div class="form-section-title">4. Category of Hurt (Legal Classification)</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Classification under Penal Code</label>
+                    <select name="category_of_hurt_opinion" class="form-control">
+                        <option value="">— Select —</option>
+                        <option value="Non-grievous" {{ 'selected' if mlr and mlr.category_of_hurt_opinion == 'Non-grievous' }}>Non-grievous (Section 310)</option>
+                        <option value="Grievous" {{ 'selected' if mlr and mlr.category_of_hurt_opinion == 'Grievous' }}>Grievous (Section 311)</option>
+                        <option value="Fatal in ordinary course" {{ 'selected' if mlr and mlr.category_of_hurt_opinion == 'Fatal in ordinary course' }}>Fatal in the ordinary course of nature (Section 294)</option>
+                        <option value="Endangering life" {{ 'selected' if mlr and mlr.category_of_hurt_opinion == 'Endangering life' }}>Endangering life (Section 298)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Conclusions -->
+        <div class="form-section">
+            <div class="form-section-title">5. Conclusions</div>
+            <div class="form-group">
+                <label class="form-label">Summary and final conclusions</label>
+                <textarea name="conclusions" class="form-control" rows="4" 
+                          placeholder="In conclusion, the above-described injuries are [consistent/not consistent] with the history given...">{{ mlr.conclusions if mlr else '' }}</textarea>
+            </div>
+        </div>
+
+        <!-- Report Status -->
+        <div class="form-section">
+            <div class="form-section-title">Report Status</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Current Status</label>
+                    <select name="report_status" class="form-control">
+                        <option value="Pending Exam" {{ 'selected' if mlr and mlr.report_status == 'Pending Exam' }}>Pending Exam</option>
+                        <option value="PMR/MLEF Drafted" {{ 'selected' if mlr and mlr.report_status == 'PMR/MLEF Drafted' }}>MLR Drafted</option>
+                        <option value="Dispatched" {{ 'selected' if mlr and mlr.report_status == 'Dispatched' }}>Dispatched</option>
+                        <option value="Received by Court" {{ 'selected' if mlr and mlr.report_status == 'Received by Court' }}>Received by Court</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last Prepared</label>
+                    <div style="padding: 8px 0; font-size: 14px; color: #6b7280;">
+                        {% if mlr and mlr.prepared_date %}
+                            {{ mlr.prepared_date.strftime('%b %d, %Y at %H:%M') }}
+                        {% else %}
+                            Not yet prepared
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="/clinical/{{ case_id }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">💾 Save MLR Report</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

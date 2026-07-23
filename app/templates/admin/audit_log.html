@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Audit Log{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 600;">🛡️ System Audit Log</h2>
+        <form method="GET" style="display: flex; gap: 8px; align-items: center;">
+            <select name="table" class="form-control" style="padding: 5px 10px; font-size: 13px; min-width: 180px;" onchange="this.form.submit()">
+                <option value="">All Tables</option>
+                {% for t in tables %}
+                <option value="{{ t.table_affected }}" {{ 'selected' if table_filter == t.table_affected }}>{{ t.table_affected }}</option>
+                {% endfor %}
+            </select>
+            <select name="user_id" class="form-control" style="padding: 5px 10px; font-size: 13px; min-width: 150px;" onchange="this.form.submit()">
+                <option value="">All Users</option>
+                {% for u in users %}
+                <option value="{{ u.user_id }}" {{ 'selected' if user_filter == u.user_id|string }}>{{ u.username }}</option>
+                {% endfor %}
+            </select>
+            {% if table_filter or user_filter %}
+            <a href="/admin/audit-log" class="btn btn-secondary btn-sm">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Table Affected</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td style="font-weight: 600; color: #6b7280;">#{{ log.audit_id }}</td>
+                    <td>{{ log.action_timestamp.strftime('%b %d, %Y %H:%M:%S') if log.action_timestamp else '—' }}</td>
+                    <td style="font-weight: 500;">{{ log.username }}</td>
+                    <td>
+                        {% if log.action_type == 'INSERT' %}
+                            <span class="badge badge-success">INSERT</span>
+                        {% elif log.action_type == 'UPDATE' %}
+                            <span class="badge badge-info">UPDATE</span>
+                        {% elif log.action_type == 'DELETE' %}
+                            <span class="badge badge-error">DELETE</span>
+                        {% else %}
+                            <span class="badge badge-warning">{{ log.action_type }}</span>
+                        {% endif %}
+                    </td>
+                    <td><code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 12px;">{{ log.table_affected }}</code></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="empty-state">No audit log entries found{{ ' matching filters' if table_filter or user_filter else '' }}.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

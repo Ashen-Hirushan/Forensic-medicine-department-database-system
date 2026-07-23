@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Patient Registry - Forensic Dept System{% endblock %}
+
+{% block content %}
+<div class="header-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <h2>Living Subjects Registry</h2>
+    <a href="/patients/new" class="btn btn-primary"><i class="fas fa-plus"></i> Register Patient</a>
+</div>
+
+<div class="card">
+    {% if patients %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>NIC</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Contact No</th>
+                    <th>Registered On</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in patients %}
+                <tr>
+                    <td>{{ p.nic_encrypted }}</td>
+                    <td>{{ p.name_encrypted }}</td>
+                    <td>{{ p.age if p.age else 'N/A' }}</td>
+                    <td>{{ p.gender }}</td>
+                    <td>{{ p.contact_no }}</td>
+                    <td>{{ p.created_at.strftime('%Y-%m-%d') if p.created_at else 'Unknown' }}</td>
+                    <td>
+                        <a href="/clinical/new?nic={{ p.nic_encrypted }}" class="btn btn-sm btn-outline-primary">Create Clinical Case</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No patients registered yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

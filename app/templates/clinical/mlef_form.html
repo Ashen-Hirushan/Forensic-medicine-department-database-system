@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Edit MLEF — {{ case.reference_no }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 860px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="font-size: 20px; font-weight: 700; margin: 0;">📄 MLEF Data Entry (Police 12/77)</h2>
+        <a href="/clinical/{{ case_id }}" class="btn btn-secondary btn-sm">← Back to Case</a>
+    </div>
+
+    <form action="/clinical/{{ case_id }}/mlef" method="POST">
+        
+        <!-- General Information -->
+        <div class="form-section">
+            <div class="form-section-title">General Information</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">MLEF Number (Police 12/77 Form No)</label>
+                    <input type="text" name="mlef_number" class="form-control" 
+                           value="{{ mlef.mlef_number or '' }}" placeholder="e.g. MLEF/2026/001">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" style="display: flex; align-items: center; gap: 8px; margin-top: 28px;">
+                        <input type="checkbox" name="consent_obtained" value="1" 
+                               {{ 'checked' if mlef and mlef.consent_obtained }} style="width: auto;">
+                        Consent Obtained from Patient
+                    </label>
+                </div>
+            </div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label class="form-label">Issued By / Accompanying Officer Information</label>
+                    <textarea name="accompanying_officer_info" class="form-control" rows="2" 
+                              placeholder="Name, rank, station, badge number of issuing/accompanying officer...">{{ mlef.accompanying_officer_info or '' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 13: Injuries -->
+        <div class="form-section">
+            <div class="form-section-title">13. Nature of the bodily harm</div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px;">
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_abrasion" value="1" {{ 'checked' if mlef and mlef.has_abrasion }} style="width: auto;"> Abrasion
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_contusion" value="1" {{ 'checked' if mlef and mlef.has_contusion }} style="width: auto;"> Contusion
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_laceration" value="1" {{ 'checked' if mlef and mlef.has_laceration }} style="width: auto;"> Laceration
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_stab" value="1" {{ 'checked' if mlef and mlef.has_stab }} style="width: auto;"> Stab
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_cut" value="1" {{ 'checked' if mlef and mlef.has_cut }} style="width: auto;"> Cut
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_fracture" value="1" {{ 'checked' if mlef and mlef.has_fracture }} style="width: auto;"> Fracture
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_gunshot" value="1" {{ 'checked' if mlef and mlef.has_gunshot }} style="width: auto;"> Firearm inj.
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_burn" value="1" {{ 'checked' if mlef and mlef.has_burn }} style="width: auto;"> Burns
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_bite" value="1" {{ 'checked' if mlef and mlef.has_bite }} style="width: auto;"> Bite
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_dislocation" value="1" {{ 'checked' if mlef and mlef.has_dislocation }} style="width: auto;"> Dislocation
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_explosive_inj" value="1" {{ 'checked' if mlef and mlef.has_explosive_inj }} style="width: auto;"> Explosive inj.
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #fee2e2; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="has_no_injury" value="1" {{ 'checked' if mlef and mlef.has_no_injury }} style="width: auto;"> None
+                </label>
+            </div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label class="form-label">Internal Injuries</label>
+                    <input type="text" name="internal_injuries" class="form-control" value="{{ mlef.internal_injuries or '' }}">
+                </div>
+            </div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label class="form-label">Others</label>
+                    <input type="text" name="other_injuries" class="form-control" value="{{ mlef.other_injuries or '' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 14: Weapon -->
+        <div class="form-section">
+            <div class="form-section-title">14. Nature of Causative Weapon</div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px;">
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="weapon_blunt" value="1" {{ 'checked' if mlef and mlef.weapon_blunt }} style="width: auto;"> Blunt
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="weapon_sharp" value="1" {{ 'checked' if mlef and mlef.weapon_sharp }} style="width: auto;"> Sharp
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="weapon_firearm" value="1" {{ 'checked' if mlef and mlef.weapon_firearm }} style="width: auto;"> Firearm
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="weapon_explosive" value="1" {{ 'checked' if mlef and mlef.weapon_explosive }} style="width: auto;"> Explosive devices
+                </label>
+            </div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <input type="text" name="weapon_other" class="form-control" placeholder="Others (Specify)" value="{{ mlef.weapon_other or '' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 15: Category of Hurt -->
+        <div class="form-section">
+            <div class="form-section-title">15. Category of Hurt</div>
+            <div class="form-row" style="align-items: center;">
+                <div class="form-group" style="flex: 1;">
+                    <select name="category_of_hurt" class="form-control">
+                        <option value="">— Select —</option>
+                        <option value="Non-grievous" {{ 'selected' if mlef and mlef.category_of_hurt == 'Non-grievous' }}>Non - grievous</option>
+                        <option value="Grievous" {{ 'selected' if mlef and mlef.category_of_hurt == 'Grievous' }}>Grievous</option>
+                        <option value="Fatal in ordinary course" {{ 'selected' if mlef and mlef.category_of_hurt == 'Fatal in ordinary course' }}>Fatal in ordinary course of nature</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1; margin-top: 0; padding-left: 20px;">
+                    <label class="form-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #b91c1c; font-weight: 600;">
+                        <input type="checkbox" name="is_life_endangering" value="1" {{ 'checked' if mlef and mlef.is_life_endangering }} style="width: auto;">
+                        If Grievous, does it endanger life?
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 16, 17: Alcohol and Drugs -->
+        <div class="form-section">
+            <div class="form-section-title">16. Examinations for consumption of alcohol</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="alcohol_smelling" value="1" {{ 'checked' if mlef and mlef.alcohol_smelling }} style="width: auto;"> Breathing smelling
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="under_influence_of_alcohol" value="1" {{ 'checked' if mlef and mlef.under_influence_of_alcohol }} style="width: auto;"> Under influence
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="alcohol_consumed" value="1" {{ 'checked' if mlef and mlef.alcohol_consumed }} style="width: auto;"> Consumed
+                </label>
+            </div>
+            
+            <div class="form-section-title" style="margin-top: 16px;">17. Examinations for consumption of drugs</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="drugs_consumed" value="1" {{ 'checked' if mlef and mlef.drugs_consumed }} style="width: auto;"> Consumed
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="drugs_under_influence" value="1" {{ 'checked' if mlef and mlef.drugs_under_influence }} style="width: auto;"> Under influence
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #dcfce7; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" name="alcohol_drugs_negative" value="1" {{ 'checked' if mlef and mlef.alcohol_drugs_negative }} style="width: auto;"> Negative (Alcohol/Drugs)
+                </label>
+            </div>
+        </div>
+
+        <!-- Section 18: Sexual Assault -->
+        <div class="form-section">
+            <div class="form-section-title">18. Examination of alleged sexual assault</div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label class="form-label">a. Brief history given by examinee</label>
+                    <textarea name="sa_history" class="form-control" rows="3">{{ mlef.sa_history or '' }}</textarea>
+                </div>
+            </div>
+            <label class="form-label" style="margin-bottom: 8px; display: block;">b. Findings of examination relevant to given history:</label>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" name="sa_vaginal_penetration" value="1" {{ 'checked' if mlef and mlef.sa_vaginal_penetration }} style="width: auto;"> i. Signs of vaginal/ hymen penetration present
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" name="sa_anal_penetration" value="1" {{ 'checked' if mlef and mlef.sa_anal_penetration }} style="width: auto;"> ii. Signs of anal penetration present
+                </label>
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" name="sa_inter_labial_penetration" value="1" {{ 'checked' if mlef and mlef.sa_inter_labial_penetration }} style="width: auto;"> iii. Signs Consistent with inter labial penetration present
+                </label>
+            </div>
+        </div>
+
+        <!-- Sections 19, 20, 21: Referrals & Opinions -->
+        <div class="form-section">
+            <div class="form-section-title">19-21. Investigations, Referrals & Recommendations</div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label class="form-label">19. Investigations</label>
+                    <input type="text" name="mlef_investigations" class="form-control" value="{{ mlef.mlef_investigations or '' }}">
+                </div>
+            </div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label class="form-label">20. Referrals</label>
+                    <input type="text" name="mlef_referrals" class="form-control" value="{{ mlef.mlef_referrals or '' }}">
+                </div>
+            </div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label class="form-label">21. Other opinions/Recommendation</label>
+                    <input type="text" name="mlef_other_opinions" class="form-control" value="{{ mlef.mlef_other_opinions or '' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 22: Remarks -->
+        <div class="form-section">
+            <div class="form-section-title">22. Remarks</div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <textarea name="injury_details" class="form-control" rows="3">{{ mlef.injury_details or '' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="/clinical/{{ case_id }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">💾 Save MLEF</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

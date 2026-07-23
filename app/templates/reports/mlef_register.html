@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block page_title %}MLEF Register{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 600;">📄 MLEF Register</h2>
+        <form method="GET" style="display: flex; gap: 8px;">
+            <input type="text" name="search" class="form-control" placeholder="Search MLEF no, reference, patient..." 
+                   value="{{ search }}" style="padding: 5px 10px; font-size: 13px; min-width: 260px;">
+            <button type="submit" class="btn btn-primary btn-sm">🔍 Search</button>
+            {% if search %}
+            <a href="/reports/mlef-register" class="btn btn-secondary btn-sm">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>MLEF No</th>
+                    <th>Reference No</th>
+                    <th>Patient</th>
+                    <th>Age/Gender</th>
+                    <th>Category</th>
+                    <th>Hurt Type</th>
+                    <th>Doctor</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td style="font-weight: 600;">{{ r.mlef_number or '—' }}</td>
+                    <td><a href="/clinical/{{ r.clinical_case_id }}" style="color: #2563eb; text-decoration: none; font-weight: 500;">{{ r.reference_no }}</a></td>
+                    <td>{{ r.patient_name }}</td>
+                    <td>{{ r.age or '—' }} / {{ r.gender or '—' }}</td>
+                    <td>{{ r.category_of_hurt or '—' }}</td>
+                    <td>
+                        {% if r.category_of_hurt == 'Non-grievous' %}
+                            <span class="badge badge-info">Non-grievous</span>
+                        {% elif r.category_of_hurt == 'Grievous' %}
+                            <span class="badge badge-warning">Grievous</span>
+                        {% elif r.category_of_hurt == 'Fatal in ordinary course' %}
+                            <span class="badge badge-error">Fatal</span>
+                        {% else %}
+                            <span style="color: #9ca3af;">—</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ r.doctor_name or '—' }}</td>
+                    <td>
+                        {% if r.report_status == 'Received by Court' %}
+                            <span class="badge badge-success">Received</span>
+                        {% elif r.report_status == 'Dispatched' %}
+                            <span class="badge badge-success">Dispatched</span>
+                        {% elif r.report_status == 'PMR/MLEF Drafted' %}
+                            <span class="badge badge-info">Drafted</span>
+                        {% else %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ r.admission_date.strftime('%b %d, %Y') if r.admission_date else '—' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="empty-state">No MLEF records found{{ ' matching "' + search + '"' if search else '' }}.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

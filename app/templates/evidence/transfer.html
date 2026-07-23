@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Evidence & Labs{% endblock %}
+
+{% block content %}
+<style>
+    .ev-tabs { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 24px; }
+    .ev-tab { padding: 10px 18px; font-size: 13px; font-weight: 600; color: #6b7280; background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+    .ev-tab:hover { color: #374151; }
+    .ev-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+    .ev-panel { display: none; }
+    .ev-panel.active { display: block; }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .mini-table th { background: #f9fafb; padding: 8px 12px; text-align: left; font-weight: 600; color: #6b7280; text-transform: uppercase; font-size: 11px; border-bottom: 1px solid #e5e7eb; }
+    .mini-table td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; color: #374151; }
+    .inline-form { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid #f3f4f6; }
+    .inline-form .form-group { margin-bottom: 0; flex: 1; min-width: 140px; }
+    .inline-form .form-label { font-size: 12px; margin-bottom: 4px; }
+    .inline-form .form-control { padding: 6px 10px; font-size: 13px; }
+    .empty-msg { text-align: center; padding: 24px; color: #9ca3af; font-style: italic; }
+</style>
+
+<div class="card">
+    <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">🧬 Evidence & Laboratory Management</h2>
+
+    <div class="ev-tabs">
+        <button class="ev-tab active" onclick="switchEvTab(event, 'evidence-list')">📦 Evidence Register</button>
+        <button class="ev-tab" onclick="switchEvTab(event, 'transfer')">🔄 Transfer Custody</button>
+        <button class="ev-tab" onclick="switchEvTab(event, 'recent')">📜 Custody Log</button>
+        <button class="ev-tab" onclick="switchEvTab(event, 'lab')">🧪 Lab Results</button>
+    </div>
+
+    <!-- =================== TAB: EVIDENCE LIST =================== -->
+    <div id="evidence-list" class="ev-panel active">
+        {% if evidence_list %}
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Description</th>
+                    <th>Case Reference</th>
+                    <th>Type</th>
+                    <th>Transfers</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ev in evidence_list %}
+                <tr>
+                    <td style="font-weight: 600;">#{{ ev.evidence_id }}</td>
+                    <td>{{ ev.description or '—' }}</td>
+                    <td><span style="color: #2563eb; font-weight: 500;">{{ ev.case_ref or '—' }}</span></td>
+                    <td>
+                        {% if ev.case_type == 'Clinical' %}
+                            <span class="badge badge-info">Clinical</span>
+                        {% else %}
+                            <span class="badge badge-warning">Autopsy</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ ev.transfer_count }} transfer{{ 's' if ev.transfer_count != 1 }}</td>
+                    <td><a href="/evidence/chain/{{ ev.evidence_id }}" class="btn btn-secondary btn-sm">View Chain</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-msg">No physical evidence registered yet.</div>
+        {% endif %}
+
+        <!-- Register New Evidence Form -->
+        <form action="/evidence/register" method="POST" class="inline-form" style="background: #f0f9ff; padding: 16px; border-radius: 10px; margin-top: 20px;">
+            <div class="form-group" style="min-width: 120px; flex: 0.5;">
+                <label class="form-label">Case Type</label>
+                <select name="case_type" class="form-control" id="ev-case-type" onchange="updateCaseDropdown()">
+                    <option value="clinical">Clinical</option>
+                    <option value="autopsy">Autopsy</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Case</label>
+                <select name="case_id" class="form-control" id="ev-case-id">
+                    {% for c in clinical_cases %}
+                    <option value="{{ c.case_id }}" data-type="clinical">{{ c.reference_no }}</option>
+                    {% endfor %}
+                    {% for a in autopsy_cases %}
+                    <option value="{{ a.case_id }}" data-type="autopsy" style="display:none;">{{ a.pm_serial_no }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="flex: 2;">
+                <label class="form-label">Description</label>
+                <input type="text" name="description" class="form-control" placeholder="e.g. Blood sample, clothing, weapon..." required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="height: fit-content;">+ Register Evidence</button>
+        </form>
+    </div>
+
+    <!-- =================== TAB: TRANSFER =================== -->
+    <div id="transfer" class="ev-panel">
+        <div style="max-width: 500px;">
+            <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 16px;">Transfer Evidence Custody</h3>
+            <p style="color: #6b7280; font-size: 13px; margin-bottom: 16px;">
+                Record the handover of physical evidence between staff members.
+            </p>
+            <form action="/evidence/do-transfer" method="POST">
+                <div class="form-group">
+                    <label class="form-label">Evidence Item</label>
+                    <select name="evidence_id" class="form-control" required>
+                        <option value="">— Select Evidence —</option>
+                        {% for ev in evidence_list %}
+                        <option value="{{ ev.evidence_id }}">#{{ ev.evidence_id }} — {{ ev.description or 'No description' }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Transfer To</label>
+                    <select name="to_user_id" class="form-control" required>
+                        <option value="">— Select Recipient —</option>
+                        {% for u in users %}
+                        <option value="{{ u.user_id }}">{{ u.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Storage Location</label>
+                    <input type="text" name="location" class="form-control" placeholder="e.g. Toxicology Lab, Fridge A" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">🔄 Record Transfer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- =================== TAB: RECENT TRANSFERS =================== -->
+    <div id="recent" class="ev-panel">
+        <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 16px;">📜 Recent Custody Transfers</h3>
+        {% if recent_transfers %}
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Evidence</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Location</th>
+                    <th>Date/Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in recent_transfers %}
+                <tr>
+                    <td style="font-weight: 500;">#{{ t.evidence_id }} — {{ t.evidence_desc }}</td>
+                    <td>{{ t.from_user or 'Initial' }}</td>
+                    <td style="font-weight: 600;">{{ t.to_user }}</td>
+                    <td>{{ t.location }}</td>
+                    <td>{{ t.transfer_datetime.strftime('%b %d, %Y %H:%M') if t.transfer_datetime else '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-msg">No custody transfers recorded yet.</div>
+        {% endif %}
+    </div>
+
+    <!-- =================== TAB: LAB RESULTS =================== -->
+    <div id="lab" class="ev-panel">
+        <div style="max-width: 500px;">
+            <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 16px;">🧪 Upload Lab Test Result</h3>
+            <p style="color: #6b7280; font-size: 13px; margin-bottom: 16px;">
+                Attach laboratory result documents (PDF or image) to a test request.
+            </p>
+            <form action="/evidence/result" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label class="form-label">Test Request ID</label>
+                    <input type="number" name="request_id" class="form-control" placeholder="e.g. 1" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Result Document</label>
+                    <input type="file" name="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                    <span class="form-hint">Accepted formats: PDF, JPG, PNG</span>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">📤 Upload Result</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function switchEvTab(e, tabId) {
+    document.querySelectorAll('.ev-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.ev-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+}
+
+function updateCaseDropdown() {
+    const type = document.getElementById('ev-case-type').value;
+    const options = document.querySelectorAll('#ev-case-id option');
+    options.forEach(opt => {
+        if (opt.dataset.type === type) {
+            opt.style.display = '';
+        } else {
+            opt.style.display = 'none';
+        }
+    });
+    // Select first visible option
+    const firstVisible = document.querySelector('#ev-case-id option[data-type="' + type + '"]');
+    if (firstVisible) firstVisible.selected = true;
+}
+</script>
+{% endblock %}

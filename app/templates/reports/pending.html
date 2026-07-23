@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Pending Reports{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="page-header">
+        <h2>Reports Awaiting Court Dispatch</h2>
+        <button onclick="window.print()" class="btn btn-secondary">🖨️ Print Report</button>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Report ID</th>
+                    <th>Case Context</th>
+                    <th>Status</th>
+                    <th>Court Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in reports %}
+                <tr>
+                    <td>{{ r.report_id }}</td>
+                    <td>{{ 'Clinical #' ~ r.clinical_case_id if r.clinical_case_id else 'Autopsy #' ~ r.autopsy_case_id }}</td>
+                    <td><span class="badge badge-warning">{{ r.report_status or r.draft_status }}</span></td>
+                    <td>{{ r.court_date or 'Not Set' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="empty-state">No pending reports.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

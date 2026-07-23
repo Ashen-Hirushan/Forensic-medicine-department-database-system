@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MLEF Report - {{ case.reference_no }}</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            line-height: 1.5;
+            color: #000;
+            background: #fff;
+            margin: 0;
+            padding: 20px 40px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            text-transform: uppercase;
+        }
+        .header h2 {
+            margin: 5px 0 0;
+            font-size: 18px;
+        }
+        .meta-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-weight: bold;
+            font-size: 16px;
+            text-decoration: underline;
+            margin-bottom: 10px;
+        }
+        .field {
+            margin-bottom: 8px;
+        }
+        .label {
+            font-weight: bold;
+        }
+        .signature-block {
+            margin-top: 60px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        @media print {
+            body { padding: 0; }
+            @page { margin: 2cm; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="margin-bottom: 20px; text-align: right;">
+        <button onclick="window.print()" style="padding: 8px 16px; background: #2563eb; color: #fff; border: none; cursor: pointer;">🖨️ Print MLEF</button>
+        <button onclick="window.close()" style="padding: 8px 16px; background: #6b7280; color: #fff; border: none; cursor: pointer;">Close</button>
+    </div>
+
+    <div class="header">
+        <h1>MEDICO-LEGAL EXAMINATION FORM (Police 12/77)</h1>
+        <h2>Department of Forensic Medicine</h2>
+    </div>
+
+    <div class="meta-info">
+        <div>
+            <div class="field"><span class="label">Reference No:</span> {{ case.reference_no }}</div>
+            <div class="field"><span class="label">Patient Name:</span> {{ case.name_encrypted }}</div>
+            <div class="field"><span class="label">NIC:</span> {{ case.nic_encrypted }}</div>
+        </div>
+        <div>
+            <div class="field"><span class="label">Examination Date:</span> {{ case.admission_date.strftime('%Y-%m-%d %H:%M') if case.admission_date else 'N/A' }}</div>
+            <div class="field"><span class="label">Age/Gender:</span> {{ case.age }} / {{ case.gender }}</div>
+        </div>
+    </div>
+
+    {% if mlef %}
+    <div class="section">
+        <div class="field"><span class="label">Police 12/77 No:</span> {{ mlef.mlef_number or '—' }}</div>
+        <div class="field"><span class="label">Category of Hurt:</span> 
+            {{ mlef.category_of_hurt if mlef.category_of_hurt else 'Not Specified' }}
+            {% if mlef.category_of_hurt == 'Grievous' and mlef.is_life_endangering %} (Endangers Life){% endif %}
+        </div>
+        <div class="field"><span class="label">Consent Obtained:</span> {{ 'Yes' if mlef.consent_obtained else 'No' }}</div>
+        
+        <div style="margin-top: 10px;">
+            <strong>Injuries Noted (Checklist):</strong> 
+            {% set inj = [] %}
+            {% if mlef.has_abrasion %}{% set _ = inj.append('Abrasion') %}{% endif %}
+            {% if mlef.has_contusion %}{% set _ = inj.append('Contusion') %}{% endif %}
+            {% if mlef.has_laceration %}{% set _ = inj.append('Laceration') %}{% endif %}
+            {% if mlef.has_stab %}{% set _ = inj.append('Stab') %}{% endif %}
+            {% if mlef.has_gunshot %}{% set _ = inj.append('Gunshot') %}{% endif %}
+            {% if mlef.has_cut %}{% set _ = inj.append('Cut') %}{% endif %}
+            {% if mlef.has_fracture %}{% set _ = inj.append('Fracture') %}{% endif %}
+            {% if mlef.has_burn %}{% set _ = inj.append('Burns') %}{% endif %}
+            {% if mlef.has_bite %}{% set _ = inj.append('Bite') %}{% endif %}
+            {% if mlef.has_dislocation %}{% set _ = inj.append('Dislocation') %}{% endif %}
+            {% if mlef.has_explosive_inj %}{% set _ = inj.append('Explosive inj.') %}{% endif %}
+            {% if mlef.has_no_injury %}{% set _ = inj.append('None') %}{% endif %}
+            {{ inj|join(', ') if inj else 'None Checked' }}
+            {% if mlef.internal_injuries %}(Internal: {{ mlef.internal_injuries }}){% endif %}
+            {% if mlef.other_injuries %}(Other: {{ mlef.other_injuries }}){% endif %}
+        </div>
+        
+        <div style="margin-top: 5px;">
+            <strong>Weapon (Checklist):</strong>
+            {% set wpn = [] %}
+            {% if mlef.weapon_sharp %}{% set _ = wpn.append('Sharp') %}{% endif %}
+            {% if mlef.weapon_blunt %}{% set _ = wpn.append('Blunt') %}{% endif %}
+            {% if mlef.weapon_firearm %}{% set _ = wpn.append('Firearm') %}{% endif %}
+            {% if mlef.weapon_explosive %}{% set _ = wpn.append('Explosive devices') %}{% endif %}
+            {{ wpn|join(', ') if wpn else 'None Checked' }}
+            {% if mlef.weapon_other %}(Other: {{ mlef.weapon_other }}){% endif %}
+        </div>
+        
+        <div style="margin-top: 5px;">
+            <strong>Alcohol / Drugs:</strong>
+            {% set alc = [] %}
+            {% if mlef.alcohol_smelling %}{% set _ = alc.append('Breath Smelling (Alcohol)') %}{% endif %}
+            {% if mlef.alcohol_consumed %}{% set _ = alc.append('Consumed (Alcohol)') %}{% endif %}
+            {% if mlef.under_influence_of_alcohol %}{% set _ = alc.append('Under Influence (Alcohol)') %}{% endif %}
+            {% if mlef.drugs_consumed %}{% set _ = alc.append('Consumed (Drugs)') %}{% endif %}
+            {% if mlef.drugs_under_influence %}{% set _ = alc.append('Under Influence (Drugs)') %}{% endif %}
+            {% if mlef.alcohol_drugs_negative %}{% set _ = alc.append('Negative') %}{% endif %}
+            {{ alc|join(', ') if alc else 'Not Specified' }}
+        </div>
+        
+        <div style="margin-top: 5px;">
+            <strong>Sexual Assault Examination:</strong>
+            {% if mlef.sa_history or mlef.sa_vaginal_penetration or mlef.sa_anal_penetration or mlef.sa_inter_labial_penetration %}
+                <ul>
+                    {% if mlef.sa_history %}<li>History: {{ mlef.sa_history }}</li>{% endif %}
+                    {% if mlef.sa_vaginal_penetration %}<li>Signs of vaginal/hymen penetration present</li>{% endif %}
+                    {% if mlef.sa_anal_penetration %}<li>Signs of anal penetration present</li>{% endif %}
+                    {% if mlef.sa_inter_labial_penetration %}<li>Signs Consistent with inter labial penetration present</li>{% endif %}
+                </ul>
+            {% else %}
+                N/A
+            {% endif %}
+        </div>
+        
+        <div style="margin-top: 5px;">
+            <strong>Investigations:</strong> {{ mlef.mlef_investigations or '—' }}<br>
+            <strong>Referrals:</strong> {{ mlef.mlef_referrals or '—' }}<br>
+            <strong>Other Opinions:</strong> {{ mlef.mlef_other_opinions or '—' }}
+        </div>
+
+        <div style="margin-top: 5px;">
+            <strong>Issued/Produced By:</strong> {{ mlef.accompanying_officer_info or '—' }}
+        </div>
+        <div style="margin-top: 5px;">
+            <strong>Remarks:</strong> {{ mlef.injury_details or '—' }}
+        </div>
+    </div>
+    {% else %}
+    <div class="section">
+        <p><em>This MLEF has not been drafted yet.</em></p>
+    </div>
+    {% endif %}
+
+    <div class="signature-block">
+        <div style="text-align: left; width: 350px;">
+            <div style="border-bottom: 1px dashed #000; height: 30px; margin-bottom: 5px;"></div>
+            <div style="font-size: 13px;">Signature of Medical Officer</div>
+            
+            <div style="display: flex; align-items: flex-end; margin-top: 15px;">
+                <div style="width: 100px; font-size: 13px;">Name:</div>
+                <div style="flex-grow: 1; border-bottom: 1px dashed #000; height: 20px;"></div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-end; margin-top: 10px;">
+                <div style="width: 100px; font-size: 13px;">Qualifications:</div>
+                <div style="flex-grow: 1; border-bottom: 1px dashed #000; height: 20px;"></div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-end; margin-top: 10px;">
+                <div style="width: 100px; font-size: 13px;">SLMC Reg No:</div>
+                <div style="flex-grow: 1; border-bottom: 1px dashed #000; height: 20px;"></div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-end; margin-top: 10px;">
+                <div style="width: 100px; font-size: 13px;">Designation:</div>
+                <div style="flex-grow: 1; border-bottom: 1px dashed #000; height: 20px;"></div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-end; margin-top: 10px;">
+                <div style="width: 100px; font-size: 13px;">Date:</div>
+                <div style="flex-grow: 1; border-bottom: 1px dashed #000; height: 20px;"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

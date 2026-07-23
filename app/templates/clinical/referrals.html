@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Referrals — {{ case.reference_no }}{% endblock %}
+
+{% block content %}
+<div class="header-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <h2>Consultation Referrals</h2>
+    <a href="/clinical/{{ case_id }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Case</a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <h4>New Referral</h4>
+            <form action="/clinical/{{ case_id }}/referrals" method="POST">
+                <div class="form-group">
+                    <label class="form-label">Specialty</label>
+                    <select name="specialty" class="form-control" required>
+                        <option value="Psychiatry">Psychiatry</option>
+                        <option value="Paediatrics">Paediatrics</option>
+                        <option value="Orthopaedics">Orthopaedics</option>
+                        <option value="Radiology">Radiology</option>
+                        <option value="General Surgery">General Surgery</option>
+                        <option value="Neurology">Neurology</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-control" required>
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                    <i class="fas fa-paper-plane"></i> Send Referral
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <h4>Referral History</h4>
+            {% if referrals %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Specialty</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ref in referrals %}
+                        <tr>
+                            <td>#{{ ref.referral_id }}</td>
+                            <td>{{ ref.referred_to_specialty }}</td>
+                            <td>
+                                {% if ref.referral_status == 'Pending' %}
+                                <span class="badge badge-warning">Pending</span>
+                                {% else %}
+                                <span class="badge badge-success">Completed</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No referrals have been made for this case.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
