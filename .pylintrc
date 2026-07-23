@@ -1,0 +1,15 @@
+[MASTER]
+
+[MESSAGES CONTROL]
+disable=
+    C0114, # missing-module-docstring
+    C0115, # missing-class-docstring
+    C0116, # missing-function-docstring
+    C0103, # invalid-name
+    W0718, # broad-exception-caught
+    R0801, # duplicate-code
+    W0613, # unused-argument
+    W0611, # unused-import
+    W0603, # global-statement
+    W0602, # global-variable-not-assigned
+    C0301  # line-too-long

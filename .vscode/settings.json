@@ -1,0 +1,13 @@
+{
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}"
+    ],
+    "files.associations": {
+        "*.html": "jinja-html"
+    },
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintArgs": [
+        "--disable=C0114,C0115,C0116,C0103,W0718,R0801,W0613,W0611,W0603,W0602"
+    ]
+}

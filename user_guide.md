@@ -65,12 +65,38 @@ When the system is set up for the first time, it automatically creates sample ac
 
 ---
 
-## 📖 5. Basic Navigation
+## 💾 5. Database Backup & Restore
+
+To ensure you never lose important medical records, the system includes a built-in backup tool.
+
+1. Locate the file **`backup.bat`** in the main project folder.
+2. Double-click to run it.
+3. You will see a menu:
+   - **Type `1`** to create a fresh backup of your entire database. It will be saved as `forensic_dept_db_backup.sql`.
+   - **Type `2`** to restore the database from a previous backup file.
+4. Press Enter. The tool will automatically use your local database credentials to perform the operation.
+
+---
+
+## 📖 6. Basic Navigation
 
 - **Dashboard**: Your home screen. Shows quick statistics (like pending cases) and gives you fast access to your most common tasks based on your role.
 - **Left Sidebar Menu**: Use this to navigate between Clinical Cases, Autopsy Cases, Lab & Evidence, and Registers.
 - **Top Right Menu (User Icon)**: Click here to view your profile or log out safely.
 
+---
+
+## 💻 7. Developer & Advanced Tools
+
+If you are a developer or IT administrator looking to modify the system:
+
+- **Source Code Structure**: You can review the complete file architecture in `source_code_structure.md` located in the project root.
+- **Running Tests**: Run `python run_tests.py` in your terminal to execute the automated test suite and ensure all modules are functioning correctly.
+- **Linting**: The codebase is formatted using `black`. We use a custom `.pylintrc` and `.vscode/settings.json` to manage warnings in modern IDEs like Visual Studio Code.
+
+---
+
 ### ❓ Troubleshooting
+
 - **"MySQL Connection Failed"**: Ensure that your MySQL server (via XAMPP or Workbench) is actually running.
 - **"Python is not recognized"**: You likely forgot to check the "Add Python to PATH" box when installing Python. Uninstall Python and reinstall it, making sure to check that box!

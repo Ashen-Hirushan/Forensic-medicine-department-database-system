@@ -4,33 +4,51 @@ from app.services.db import call_procedure
 from datetime import datetime
 import json
 
-dashboard_bp = Blueprint('dashboard', __name__)
+dashboard_bp = Blueprint("dashboard", __name__)
 
-@dashboard_bp.route('/dashboard')
+
+@dashboard_bp.route("/dashboard")
 @login_required
 def dashboard():
     from app.services.db import execute_query
-    
+
     # 1. Total Cases & Cases by Type
-    clinical_cases_res = execute_query("SELECT COUNT(*) as count FROM clinical_examinations", fetch_all=False)
-    autopsy_cases_res = execute_query("SELECT COUNT(*) as count FROM postmortem_investigations", fetch_all=False)
-    
-    total_clinical = clinical_cases_res['count'] if clinical_cases_res else 0
-    total_autopsies = autopsy_cases_res['count'] if autopsy_cases_res else 0
+    clinical_cases_res = execute_query(
+        "SELECT COUNT(*) as count FROM clinical_examinations", fetch_all=False
+    )
+    autopsy_cases_res = execute_query(
+        "SELECT COUNT(*) as count FROM postmortem_investigations", fetch_all=False
+    )
+
+    total_clinical = clinical_cases_res["count"] if clinical_cases_res else 0
+    total_autopsies = autopsy_cases_res["count"] if autopsy_cases_res else 0
     total_cases = total_clinical + total_autopsies
 
     # 2. Active Cases
-    clinical_active_res = execute_query("SELECT COUNT(*) as count FROM clinical_examinations WHERE report_submission_date IS NULL", fetch_all=False)
-    autopsy_active_res = execute_query("SELECT COUNT(*) as count FROM postmortem_investigations WHERE report_submission_date IS NULL", fetch_all=False)
-    active_cases = (clinical_active_res['count'] if clinical_active_res else 0) + (autopsy_active_res['count'] if autopsy_active_res else 0)
-    
+    clinical_active_res = execute_query(
+        "SELECT COUNT(*) as count FROM clinical_examinations WHERE report_submission_date IS NULL",
+        fetch_all=False,
+    )
+    autopsy_active_res = execute_query(
+        "SELECT COUNT(*) as count FROM postmortem_investigations WHERE report_submission_date IS NULL",
+        fetch_all=False,
+    )
+    active_cases = (clinical_active_res["count"] if clinical_active_res else 0) + (
+        autopsy_active_res["count"] if autopsy_active_res else 0
+    )
+
     # 3. Total Patients (Registered Living Subjects)
-    total_patients_res = execute_query("SELECT COUNT(*) as count FROM living_subjects", fetch_all=False)
-    total_patients = total_patients_res['count'] if total_patients_res else 0
-    
+    total_patients_res = execute_query(
+        "SELECT COUNT(*) as count FROM living_subjects", fetch_all=False
+    )
+    total_patients = total_patients_res["count"] if total_patients_res else 0
+
     # 4. Pending Reports
-    pending_reports_res = execute_query("SELECT COUNT(*) as count FROM court_submissions WHERE receipt_scan_path IS NULL", fetch_all=False)
-    pending_reports = pending_reports_res['count'] if pending_reports_res else 0
+    pending_reports_res = execute_query(
+        "SELECT COUNT(*) as count FROM court_submissions WHERE receipt_scan_path IS NULL",
+        fetch_all=False,
+    )
+    pending_reports = pending_reports_res["count"] if pending_reports_res else 0
 
     # 5. Recent Cases (Union Query)
     recent_cases_query = """
@@ -61,10 +79,10 @@ def dashboard():
         recent_cases = []
 
     for case in recent_cases:
-        if case['status'] == 'Under Investigation':
-            case['priority'] = 'Urgent'
+        if case["status"] == "Under Investigation":
+            case["priority"] = "Urgent"
         else:
-            case['priority'] = 'Normal'
+            case["priority"] = "Normal"
 
     # 6. Monthly Trend Data (last 6 months)
     monthly_trend_query = """
@@ -94,10 +112,10 @@ def dashboard():
     monthly_trend = execute_query(monthly_trend_query, fetch_all=True)
     if not monthly_trend:
         monthly_trend = []
-    
-    trend_labels = [r['month_label'] for r in monthly_trend]
-    trend_clinical = [int(r['clinical_count']) for r in monthly_trend]
-    trend_autopsy = [int(r['autopsy_count']) for r in monthly_trend]
+
+    trend_labels = [r["month_label"] for r in monthly_trend]
+    trend_clinical = [int(r["clinical_count"]) for r in monthly_trend]
+    trend_autopsy = [int(r["autopsy_count"]) for r in monthly_trend]
 
     # 7. Case Category Breakdown (for clinical)
     category_query = """
@@ -110,25 +128,26 @@ def dashboard():
     categories = execute_query(category_query, fetch_all=True)
     if not categories:
         categories = []
-    
-    cat_labels = [r['category'] for r in categories]
-    cat_values = [int(r['cnt']) for r in categories]
+
+    cat_labels = [r["category"] for r in categories]
+    cat_values = [int(r["cnt"]) for r in categories]
 
     # Current date for header
-    current_date_str = datetime.now().strftime('%A, %B %d, %Y')
-    
-    return render_template('dashboard.html', 
-                           total_cases=total_cases,
-                           total_clinical=total_clinical,
-                           total_autopsies=total_autopsies,
-                           active_cases=active_cases,
-                           total_patients=total_patients,
-                           pending_reports=pending_reports,
-                           recent_cases=recent_cases,
-                           current_date=current_date_str,
-                           trend_labels=json.dumps(trend_labels),
-                           trend_clinical=json.dumps(trend_clinical),
-                           trend_autopsy=json.dumps(trend_autopsy),
-                           cat_labels=json.dumps(cat_labels),
-                           cat_values=json.dumps(cat_values))
+    current_date_str = datetime.now().strftime("%A, %B %d, %Y")
 
+    return render_template(
+        "dashboard.html",
+        total_cases=total_cases,
+        total_clinical=total_clinical,
+        total_autopsies=total_autopsies,
+        active_cases=active_cases,
+        total_patients=total_patients,
+        pending_reports=pending_reports,
+        recent_cases=recent_cases,
+        current_date=current_date_str,
+        trend_labels=json.dumps(trend_labels),
+        trend_clinical=json.dumps(trend_clinical),
+        trend_autopsy=json.dumps(trend_autopsy),
+        cat_labels=json.dumps(cat_labels),
+        cat_values=json.dumps(cat_values),
+    )
