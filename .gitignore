@@ -1,0 +1,26 @@
+# Virtual Environments
+venv/
+env/
+ENV/
+
+# Environment Variables / Credentials
+.env
+
+# Python Cache Files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Flask Session Data
+flask_session/
+
+# User Uploaded Files & Images
+uploads/
+app/static/images/uploads/
+
+# Testing Logs
+test_results.txt
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
