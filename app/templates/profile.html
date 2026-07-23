@@ -52,6 +52,15 @@
         {% else %}
             <p style="color: var(--text-muted); font-size: var(--font-size-sm);">Your account is not linked to a staff directory profile.</p>
         {% endif %}
+
+        {% if session.get('role_name') == 'Admin' %}
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: var(--space-4) 0;">
+        <div style="background: rgba(59, 130, 246, 0.08); border-left: 4px solid var(--color-primary); padding: var(--space-3); border-radius: var(--radius-sm);">
+            <div style="font-weight: 600; font-size: var(--font-size-sm); margin-bottom: var(--space-1);">Admin Management Controls</div>
+            <p style="font-size: var(--font-size-xs); color: var(--text-secondary); margin-bottom: var(--space-2);">As an administrator, you can view, manage, and delete system user profiles.</p>
+            <a href="/admin/users" class="btn btn-primary btn-sm">👥 Manage & Delete User Profiles</a>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Change Password Card -->

@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, request
-from app.services.auth_utils import login_required
-from app.services.db import execute_query
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+from app.services.auth_utils import login_required, roles_allowed
+from app.services.db import execute_query, get_db
 
 reports_bp = Blueprint('reports', __name__)
 
@@ -47,6 +47,37 @@ def mlef_register():
     records = execute_query(query, tuple(params))
     return render_template('reports/mlef_register.html', records=records, search=search)
 
+@reports_bp.route('/mlef-register/delete/<int:case_id>', methods=['POST'])
+@login_required
+@roles_allowed('Admin')
+def delete_mlef(case_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM evidence_custody_logs WHERE evidence_id IN (SELECT evidence_id FROM physical_evidence WHERE clinical_case_id = %s)", (case_id,))
+        cursor.execute("DELETE FROM physical_evidence WHERE clinical_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM asset_revisions WHERE asset_id IN (SELECT asset_id FROM digital_assets WHERE clinical_case_id = %s)", (case_id,))
+        cursor.execute("DELETE FROM digital_assets WHERE clinical_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM test_results WHERE request_id IN (SELECT request_id FROM test_requests WHERE clinical_case_id = %s)", (case_id,))
+        cursor.execute("DELETE FROM test_requests WHERE clinical_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM wound_charts WHERE clinical_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM peer_reviews WHERE clinical_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM court_submissions WHERE clinical_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM consultation_referrals WHERE clinical_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM clinical_observations WHERE clinical_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM mlr_documents WHERE clinical_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM mlef_records WHERE clinical_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM clinical_examinations WHERE case_id = %s", (case_id,))
+        conn.commit()
+        flash("MLEF Case and all associated records deleted successfully.", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Failed to delete case: {str(e)}", "danger")
+    finally:
+        cursor.close()
+    return redirect(url_for('reports.mlef_register'))
+
+
 @reports_bp.route('/pm-register', methods=['GET'])
 @login_required
 def pm_register():
@@ -77,6 +108,34 @@ def pm_register():
     records = execute_query(query, tuple(params))
     return render_template('reports/pm_register.html', records=records, search=search)
 
+@reports_bp.route('/pm-register/delete/<int:case_id>', methods=['POST'])
+@login_required
+@roles_allowed('Admin')
+def delete_pm(case_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM evidence_custody_logs WHERE evidence_id IN (SELECT evidence_id FROM physical_evidence WHERE autopsy_case_id = %s)", (case_id,))
+        cursor.execute("DELETE FROM physical_evidence WHERE autopsy_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM asset_revisions WHERE asset_id IN (SELECT asset_id FROM digital_assets WHERE autopsy_case_id = %s)", (case_id,))
+        cursor.execute("DELETE FROM digital_assets WHERE autopsy_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM test_results WHERE request_id IN (SELECT request_id FROM test_requests WHERE autopsy_case_id = %s)", (case_id,))
+        cursor.execute("DELETE FROM test_requests WHERE autopsy_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM wound_charts WHERE autopsy_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM peer_reviews WHERE autopsy_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM court_submissions WHERE autopsy_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM voice_dictations WHERE autopsy_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM death_certificates WHERE autopsy_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM pmr_drafts WHERE autopsy_case_id = %s", (case_id,))
+        cursor.execute("DELETE FROM postmortem_investigations WHERE case_id = %s", (case_id,))
+        conn.commit()
+        flash("PM Case and all associated records deleted successfully.", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Failed to delete case: {str(e)}", "danger")
+    finally:
+        cursor.close()
+    return redirect(url_for('reports.pm_register'))
 
 @reports_bp.route('/mlr/<int:case_id>/print', methods=['GET'])
 @login_required

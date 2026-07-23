@@ -23,7 +23,7 @@ def login_required(f):
 def roles_allowed(*allowed_roles):
     """
     Decorator to restrict access to specific roles.
-    Example: @roles_allowed('Administrator', 'Doctor / JMO')
+    Example: @roles_allowed('Admin', 'Doctor')
     """
     def decorator(f):
         @wraps(f)
@@ -32,8 +32,18 @@ def roles_allowed(*allowed_roles):
                 flash("Please log in to access this page.", "error")
                 return redirect('/login')
             
-            user_role = session.get('role_name')
-            if user_role not in allowed_roles:
+            user_role = session.get('role_name', '')
+            allowed_lower = [r.lower() for r in allowed_roles]
+            
+            is_allowed = False
+            if user_role:
+                u_lower = user_role.lower()
+                for r in allowed_lower:
+                    if u_lower == r or (r == 'admin' and 'admin' in u_lower):
+                        is_allowed = True
+                        break
+                        
+            if not is_allowed:
                 abort(403) # Forbidden
                 
             return f(*args, **kwargs)

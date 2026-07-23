@@ -1,70 +1,76 @@
-# ForensicDB: Role-Based User Guide
+# ForensicDB - User & Installation Guide
 
-The Forensic Medicine Department Management System (ForensicDB) utilizes strict Role-Based Access Control (RBAC). What you can see and do depends entirely on the role assigned to your account during registration.
+Welcome to the **Forensic Medicine Department Database System (ForensicDB)**. This system is designed to be as easy to install and run as possible, even for non-technical users.
 
-Here is a comprehensive guide on how to use the system as each of the four primary roles.
+## 🛠️ 1. Prerequisites (For a New Computer)
 
----
+Before running the application on a new computer, you only need two things installed:
 
-## 👨‍⚕️ 1. Doctor (JMO - Judicial Medical Officer)
-*The Doctor is the core medical user of the system. Their primary focus is managing cases, conducting examinations, and drafting legal reports.*
+1. **Python (Version 3.8 or newer)**
+   - Download from: [python.org/downloads](https://www.python.org/downloads/)
+   - **CRITICAL STEP**: When installing Python, make sure to check the box at the very bottom that says **"Add Python to PATH"** before clicking Install.
 
-### Key Workflows
-1. **Managing Patients & Cases**
-   * **View Patients:** Navigate to the `Living Subjects` registry to view patient details.
-   * **Clinical Cases:** Under the `Clinical Cases` tab, you can view cases assigned to you. Click into a case to draft the MLEF (Medico-Legal Examination Form), record injuries in the Wound Chart, and finalize the MLR (Medico-Legal Report).
-   * **Autopsy Cases:** Under the `Post-Mortem Cases` tab, you can manage cadaver examinations. You can upload Voice Dictations (audio files) from the autopsy room, fill out the Post-Mortem Report (PMR), and formally declare the Cause of Death (COD).
-   
-2. **Consultations & Peer Reviews**
-   * **Referrals:** Inside a clinical case, use the `Consultations` tab to refer a patient to another specialty (e.g., Psychiatry).
-   * **Peer Reviews:** You can invite other Doctors to peer-review your PMR or MLR before finalizing it for court.
-
-3. **Submitting Evidence & Tests**
-   * Doctors can log Physical Evidence found on a subject and send Test Requests to the Lab Staff directly through the case interface.
+2. **MySQL Server (or XAMPP)**
+   - The easiest way is to download XAMPP from: [apachefriends.org](https://www.apachefriends.org/index.html)
+   - Open the XAMPP Control Panel and click **Start** next to MySQL.
 
 ---
 
-## 👔 2. Clerk (Administrative Staff)
-*The Clerk handles the intake of patients, dispatching of reports, and managing court relations. They do not have access to draft medical opinions.*
+## ⚙️ 2. Database Configuration (.env file)
 
-### Key Workflows
-1. **Intake & Registration**
-   * **Registering Subjects:** Clerks will spend a lot of time in the `Living Subjects` registry. When a new subject arrives (e.g., via Police), the Clerk registers their NIC and demographic details.
-   * **Opening Cases:** After registering a subject, the Clerk opens a new Clinical or Autopsy case, assigns it a Reference No/PM Serial No, and routes it to a specific Doctor on duty.
+When moving the project to a new computer, you must tell the application how to connect to that computer's database server.
 
-2. **Court Dispatch & Summons**
-   * **Managing Submissions:** Navigate to the `Court Dispatch` tab. When a Doctor finalizes an MLR or PMR, the Clerk creates a Court Submission to send the document to the respective Magistrate or High Court.
-   * **Logging Receipts:** When the court acknowledges receipt of a report, the Clerk scans the physical receipt and uploads it via the system to officially mark the case as "Received by Court".
-
-3. **Evidence Custody**
-   * Clerks often act as the middlemen for physical evidence, logging the transfer of evidence from the Doctor to the Police or Lab using the `Evidence Custody` transfer tool.
-
----
-
-## 🔬 3. Lab Staff (Technicians & Analysts)
-*Lab Staff have a very focused workflow. They do not view full clinical histories; they only see requested tests and upload the scientific results.*
-
-### Key Workflows
-1. **Managing Test Requests**
-   * **Pending Queue:** Lab Staff monitor the `Lab Requests` or `Evidence` queue. When a Doctor requests a toxicology or histology test, it appears here.
-2. **Uploading Results**
-   * Once the lab analysis is complete, the Lab Staff selects the pending request, uploads the PDF/Image of the result, and marks the request as "Completed". The Doctor is immediately notified and can view the result in the patient's case file.
-3. **Chain of Custody**
-   * If physical evidence (like a blood sample or clothing) is transferred to the lab, Lab Staff must accept the custody transfer in the system to maintain a legally watertight chain of custody.
+1. Open the project folder.
+2. Find the file named **`.env`** (if it doesn't exist, the launcher will create one for you, or you can copy `.env.example`).
+3. Open the `.env` file using Notepad.
+4. Update the database credentials to match your new computer's MySQL setup:
+   ```ini
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_USER=root
+   DB_PASSWORD=your_mysql_password_here
+   DB_NAME=forensic_dept_db
+   ```
+   *(Note: If you are using XAMPP, the `DB_PASSWORD` is usually left completely blank!)*
 
 ---
 
-## 👑 4. Admin (System Administrator)
-*The Admin oversees the entire operation, manages user access, and monitors system integrity. Admins have read access to almost everything but shouldn't interfere with medical opinions.*
+## 🚀 3. How to Start the Application
 
-### Key Workflows
-1. **User Management & Security**
-   * **Staff Directory:** Admins approve new signups and manage the `Staff Directory`. They can lock accounts, reset passwords, or change a user's role.
-   * **Audit Trails:** The system automatically logs every `INSERT` and `UPDATE` on cases and court submissions. Admins can view the `Audit Logs` to see exactly *who* changed *what* and *when* (including tracking old vs. new values) to prevent tampering.
+1. Open the folder containing the project files.
+2. Double-click the file named **`ForensicDB_Launcher.bat`**.
+3. A black console window will open. The launcher will automatically:
+   - Check if Python is installed.
+   - Download and install all required background packages.
+   - Connect to your database. (If it asks for a MySQL password, type your password and press Enter. If you use XAMPP, just press Enter to leave it blank).
+   - Create all the necessary database tables and sample users.
+   - Automatically open your default web browser to the login screen!
 
-2. **Reporting & Analytics**
-   * **Dashboard Analytics:** Admins have access to the full `Dashboard`, viewing real-time Chart.js graphs of monthly case influx, clinical injury breakdowns (e.g., trauma vs. assault), and pending court backlogs.
-   * **Exporting Registers:** Admins can export the full MLEF Register and PM Register for monthly government reporting.
+> **Note**: Do not close the black console window while using the application. When you are done using ForensicDB for the day, simply close the black window to shut down the server.
 
-3. **Disaster Recovery**
-   * The Admin is responsible for running the `backup.bat` tool on the server to take routine snapshots of the MySQL database.
+---
+
+## 🔑 4. Default Login Accounts
+
+When the system is set up for the first time, it automatically creates sample accounts so you can log in immediately. 
+
+*The password for ALL accounts is: **`securepass123`***
+
+| Role | Username | What they can do |
+|------|----------|------------------|
+| **System Admin** | `admin_user` | Full access. Can view the Audit Log, manage users, and delete user profiles. |
+| **Medical Officer (JMO)** | `dr_chathula` | Can examine patients, conduct postmortems, order lab tests, and write official reports (MLEF/PMR). |
+| **Department Clerk** | `clerk_nimal` | Registers new cases (Living Subjects and Cadavers) and prepares court dispatches. |
+| **Lab Technician** | `lab_kamal` | Receives evidence via chain of custody, conducts tests, and uploads lab results. |
+
+---
+
+## 📖 5. Basic Navigation
+
+- **Dashboard**: Your home screen. Shows quick statistics (like pending cases) and gives you fast access to your most common tasks based on your role.
+- **Left Sidebar Menu**: Use this to navigate between Clinical Cases, Autopsy Cases, Lab & Evidence, and Registers.
+- **Top Right Menu (User Icon)**: Click here to view your profile or log out safely.
+
+### ❓ Troubleshooting
+- **"MySQL Connection Failed"**: Ensure that your MySQL server (via XAMPP or Workbench) is actually running.
+- **"Python is not recognized"**: You likely forgot to check the "Add Python to PATH" box when installing Python. Uninstall Python and reinstall it, making sure to check that box!

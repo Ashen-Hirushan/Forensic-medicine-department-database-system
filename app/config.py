@@ -7,6 +7,7 @@ load_dotenv()
 class Config:
     # Flask secret key for sessions
     SECRET_KEY = os.environ.get('SECRET_KEY', 'default-dev-secret-key-change-in-prod')
+    TEMPLATES_AUTO_RELOAD = True
     
     # Database Configuration
     DB_HOST = os.environ.get('DB_HOST', 'localhost')

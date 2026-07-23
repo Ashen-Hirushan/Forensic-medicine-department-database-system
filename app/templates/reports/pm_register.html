@@ -28,6 +28,9 @@
                     <th>Doctor</th>
                     <th>PMR Status</th>
                     <th>Autopsy Date</th>
+                    {% if session.get('role_name') and 'admin' in session.get('role_name')|lower %}
+                    <th style="width: 70px; text-align: center;">Actions</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -63,6 +66,13 @@
                         {% endif %}
                     </td>
                     <td>{{ r.autopsy_date.strftime('%b %d, %Y') if r.autopsy_date else '—' }}</td>
+                    {% if session.get('role_name') and 'admin' in session.get('role_name')|lower %}
+                    <td style="text-align: center;">
+                        <form action="/reports/pm-register/delete/{{ r.case_id }}" method="POST" onsubmit="return confirm('WARNING: Are you sure you want to delete this PM Case? This will permanently delete ALL related autopsy records, lab tests, evidence, and death certificates!');" style="display:inline;">
+                            <button type="submit" class="btn btn-sm" style="background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 2px 6px; font-size: 11px;">🗑️ Delete</button>
+                        </form>
+                    </td>
+                    {% endif %}
                 </tr>
                 {% else %}
                 <tr>

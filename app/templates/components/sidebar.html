@@ -43,9 +43,14 @@
             <span class="nav-icon">📑</span> Pending Reports
         </a>
 
+        {% if session.get('role_name') and 'admin' in session.get('role_name')|lower %}
         <span class="nav-section-label">System</span>
+        <a href="/admin/users" class="nav-item">
+            <span class="nav-icon">👥</span> Users
+        </a>
         <a href="/admin/audit-log" class="nav-item">
             <span class="nav-icon">🛡️</span> Audit Log
         </a>
+        {% endif %}
     </nav>
 </aside>

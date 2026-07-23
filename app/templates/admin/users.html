@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block page_title %}User Profile Management{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+            <h2 style="margin: 0; font-size: 20px; font-weight: 600;">👥 User Profile Management</h2>
+            <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 13px;">Manage active user accounts across all roles (Admin, Doctor, Clerk, Lab Staff)</p>
+        </div>
+        <div>
+            <a href="/admin/audit-log" class="btn btn-secondary btn-sm">🛡️ View Audit Trail</a>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>User Account</th>
+                    <th>Full Name</th>
+                    <th>System Role</th>
+                    <th>Designation</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td style="font-weight: 600; color: var(--text-muted);">#{{ u.user_id }}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            {% if u.profile_picture and u.profile_picture != 'default.png' %}
+                                <img src="{{ url_for('static', filename='uploads/profiles/' + u.profile_picture) }}" alt="" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
+                            {% else %}
+                                <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--bg-main); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--text-muted);">
+                                    👤
+                                </div>
+                            {% endif %}
+                            <div>
+                                <div style="font-weight: 600; color: var(--text-primary);">{{ u.username }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="font-weight: 500;">{{ u.full_name or '—' }}</td>
+                    <td>
+                        {% if u.role_name == 'Admin' %}
+                            <span class="badge badge-error">Admin</span>
+                        {% elif u.role_name == 'Doctor' %}
+                            <span class="badge badge-info">Doctor</span>
+                        {% elif u.role_name == 'Clerk' %}
+                            <span class="badge badge-warning">Clerk</span>
+                        {% elif u.role_name == 'Lab Staff' %}
+                            <span class="badge badge-success">Lab Staff</span>
+                        {% else %}
+                            <span class="badge badge-secondary">{{ u.role_name }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: var(--text-secondary);">{{ u.designation or 'Not specified' }}</td>
+                    <td style="text-align: right;">
+                        {% if u.user_id == session.get('user_id') %}
+                            <span class="badge badge-info" style="opacity: 0.85;">Current Admin (Logged In)</span>
+                        {% else %}
+                            <button type="button" class="btn btn-danger btn-sm" onclick="triggerDeleteUserModal({{ u.user_id }}, '{{ u.username|e }}', '{{ u.role_name|e }}', '{{ (u.full_name or u.username)|e }}')">
+                                🗑️ Delete Profile
+                            </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="empty-state">No system users found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Delete User Profile Confirmation Modal -->
+<div id="deleteProfileModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: var(--card-bg, #1e293b); border: 1px solid var(--border-color, #334155); border-radius: 12px; max-width: 480px; width: 90%; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; color: #ef4444;">
+            <div style="font-size: 2rem;">⚠️</div>
+            <div>
+                <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc);">Confirm Profile Deletion</h3>
+                <div style="font-size: 12px; color: var(--text-secondary, #94a3b8);">Admin Access Action Required</div>
+            </div>
+        </div>
+        
+        <div style="font-size: 14px; color: var(--text-primary, #cbd5e1); line-height: 1.6; margin-bottom: 20px;">
+            Are you sure you want to delete the profile for user <strong id="deleteTargetUsername" style="color: #60a5fa;"></strong> (<span id="deleteTargetRole" style="font-weight: 600;"></span>)?
+            
+            <div style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 12px; margin-top: 14px; border-radius: 4px; color: #fca5a5; font-size: 13px;">
+                <strong>Warning:</strong> Deleting this profile will permanently remove this staff member's account access from ForensicDB. This action cannot be undone.
+            </div>
+        </div>
+
+        <form id="deleteUserForm" method="POST" action="">
+            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button type="submit" class="btn btn-danger" style="background-color: #dc2626; border-color: #dc2626;">Yes, Delete Profile</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function triggerDeleteUserModal(userId, username, roleName, fullName) {
+    document.getElementById('deleteTargetUsername').textContent = username + (fullName ? ' (' + fullName + ')' : '');
+    document.getElementById('deleteTargetRole').textContent = roleName;
+    document.getElementById('deleteUserForm').action = '/admin/users/delete/' + userId;
+    
+    var modal = document.getElementById('deleteProfileModal');
+    modal.style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    var modal = document.getElementById('deleteProfileModal');
+    modal.style.display = 'none';
+}
+
+// Close modal when clicking outside box
+window.onclick = function(event) {
+    var modal = document.getElementById('deleteProfileModal');
+    if (event.target === modal) {
+        closeDeleteModal();
+    }
+}
+</script>
+{% endblock %}
