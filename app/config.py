@@ -18,7 +18,7 @@ class Config:
     # Session Configuration (using filesystem to avoid requiring Redis for now)
     SESSION_TYPE = 'filesystem'
     SESSION_PERMANENT = False
-    SESSION_USE_SIGNER = True
+    SESSION_FILE_DIR = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'flask_session_data')
 
     # Upload Folders Paths
     BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
