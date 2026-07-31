@@ -45,6 +45,7 @@ When moving the project to a new computer, you must tell the application how to 
    - Connect to your database. (If it asks for a MySQL password, type your password and press Enter. If you use XAMPP, just press Enter to leave it blank).
    - Create all the necessary database tables and sample users.
    - Automatically open your default web browser to the login screen!
+4. Then run **`ForensicDB_Launcher.bat`** file again if you are doing first time
 
 > **Note**: Do not close the black console window while using the application. When you are done using ForensicDB for the day, simply close the black window to shut down the server.
 
